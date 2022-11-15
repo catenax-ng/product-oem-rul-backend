@@ -1,2 +1,4 @@
 /product-oem-rul-backend.iml
 /target
+/src/main/resources/rulbackendservice-bindings.properties
+/src/main/resources/healthindicatordb-bindings.properties
