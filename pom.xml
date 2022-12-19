@@ -79,6 +79,7 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
 					<mainClass>net.catena_x.btp.rul.oem.backend.rul_service.OemRulBackendServiceApplication</mainClass>
+					<fork>false</fork>
 				</configuration>
 			</plugin>
 			<plugin>
