@@ -1,4 +1,5 @@
 /product-oem-rul-backend.iml
 /target
 /src/main/resources/rulbackendservice-bindings.properties
-/src/main/resources/healthindicatordb-bindings.properties
+/src/main/resources/ruldb-bindings.properties
+/src/main/resources/rawdatadb-bindings.properties
