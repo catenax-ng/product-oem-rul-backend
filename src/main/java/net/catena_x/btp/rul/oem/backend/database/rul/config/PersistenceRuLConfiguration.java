@@ -31,7 +31,7 @@ import static org.hibernate.cfg.AvailableSettings.*;
 public class PersistenceRuLConfiguration {
     public static final String PREFIX = "rul";
     public static final String CONFIG_PREFIX = "ruldb.";
-    public static final String BASE_PACKAGES = "net.catena_x.btp.rul.oem.database.rul.tables";
+    public static final String BASE_PACKAGES = "net.catena_x.btp.rul.oem.backend.database.rul.tables";
 
     public static final String ENTITY_MANAGER_FACTORY = PREFIX + "EntityManagerFactory";
     public static final String ENTITY_MANAGER_FACTORY_BUILDER = ENTITY_MANAGER_FACTORY + "Builder";
