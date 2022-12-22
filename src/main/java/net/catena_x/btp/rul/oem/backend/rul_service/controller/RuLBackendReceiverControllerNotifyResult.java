@@ -4,7 +4,7 @@ import net.catena_x.btp.libraries.notification.dto.Notification;
 import net.catena_x.btp.libraries.util.apihelper.ApiHelper;
 import net.catena_x.btp.libraries.util.apihelper.model.DefaultApiResult;
 import net.catena_x.btp.rul.oem.backend.rul_service.controller.swagger.ReceiverNotifyResultDoc;
-import net.catena_x.btp.rul.oem.backend.rul_service.notifications.dto.RuLNotificationFromSupplierContent;
+import net.catena_x.btp.rul.oem.backend.rul_service.notifications.dto.supplierservice.RuLNotificationFromSupplierContent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
