@@ -17,20 +17,20 @@ import org.springframework.context.annotation.ComponentScan;
 @ComponentScan(basePackages = {
 		"net.catena_x.btp.rul.oem.backend",
 		"net.catena_x.btp.rul.oem.util",
-		"net.catena_x.btp.rul.supplier",
+		"net.catena_x.btp.rul.mockups",
 		"net.catena_x.btp.libraries.notification",
 		"net.catena_x.btp.libraries.oem.backend.model.dto",
 		"net.catena_x.btp.libraries.oem.backend.cloud",
 		"net.catena_x.btp.libraries.oem.backend.edc",
 		"net.catena_x.btp.libraries.util",
 		"net.catena_x.btp.libraries.edc",
-		"net.catena_x.btp.libraries.oem.backend.database.rawdata"})
+		"net.catena_x.btp.libraries.oem.backend.database"})
 @OpenAPIDefinition(info = @Info(title = "OEM rul backend service", version = "0.0.99"))
 public class OemRulBackendServiceApplication {
 	public static void main(String[] args) {
 		new SpringApplicationBuilder()
-		.sources(OemRulBackendServiceApplication.class)
-		.profiles("rulbackendservice")
-		.run(args);
+				.sources(OemRulBackendServiceApplication.class)
+				.profiles("rulbackendservice")
+				.run(args);
 	}
 }

@@ -1,7 +1,12 @@
 package net.catena_x.btp.rul.oem.backend.database.rul.tables.vinrelation;
 
+import net.catena_x.btp.libraries.oem.backend.database.util.exceptions.OemDatabaseException;
+import net.catena_x.btp.libraries.oem.backend.model.dto.vehicle.Vehicle;
+import net.catena_x.btp.libraries.oem.backend.model.dto.vehicle.VehicleTable;
 import net.catena_x.btp.rul.oem.backend.database.rul.annotations.RuLTransactionDefaultCreateNew;
 import net.catena_x.btp.rul.oem.backend.database.rul.annotations.RuLTransactionDefaultUseExisting;
+import net.catena_x.btp.rul.oem.backend.database.rul.annotations.RuLTransactionSerializableCreateNew;
+import net.catena_x.btp.rul.oem.backend.database.rul.annotations.RuLTransactionSerializableUseExisting;
 import net.catena_x.btp.rul.oem.backend.database.rul.base.RuLTableBase;
 import net.catena_x.btp.rul.oem.util.exceptions.OemRuLException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,18 +14,35 @@ import org.springframework.stereotype.Component;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
+import java.util.function.Supplier;
 
 @Component
 public class RuLVinRelationTableInternal extends RuLTableBase {
     @Autowired private RuLVinRelationRepository rulVinRelationRepository;
+    @Autowired private VehicleTable vehicleTable;
+
+    @RuLTransactionSerializableUseExisting
+    public Exception runSerializableExternalTransaction(@NotNull final Supplier<Exception> function) {
+        return function.get();
+    }
+
+    @RuLTransactionSerializableCreateNew
+    public Exception runSerializableNewTransaction(@NotNull final Supplier<Exception> function) {
+        return runSerializableExternalTransaction(function);
+    }
 
     @RuLTransactionDefaultUseExisting
     public void insertExternalTransaction(@NotNull final String vin,
                                           @NotNull final String refId) throws OemRuLException {
         try {
+            final Vehicle existingVehicle = vehicleTable.getByIdNewTransaction(refId);
+            if(!isVehicleRefIdExisting(refId)) {
+                throw new OemRuLException("Vehicle with given ref-id does not exist in rawdata database!");
+            }
+
             rulVinRelationRepository.insert(vin, refId);
         } catch (final Exception exception) {
-            throw failed("Inserting VIN relation failed!", exception);
+            throw failed("Inserting VIN relation failed: " + exception.getMessage(), exception);
         }
     }
 
@@ -29,12 +51,16 @@ public class RuLVinRelationTableInternal extends RuLTableBase {
         insertExternalTransaction(vin, refId);
     }
 
+    private boolean isVehicleRefIdExisting(@NotNull final String refId) throws OemDatabaseException {
+        return vehicleTable.getByIdNewTransaction(refId) != null;
+    }
+
     @RuLTransactionDefaultUseExisting
     public void deleteAllExternalTransaction() throws OemRuLException {
         try {
             rulVinRelationRepository.deleteAll();
         } catch (final Exception exception) {
-            throw failed("Deleting all VIN relations failed!", exception);
+            throw failed("Deleting all VIN relations failed: " + exception.getMessage(), exception);
         }
     }
 
@@ -43,32 +69,48 @@ public class RuLVinRelationTableInternal extends RuLTableBase {
         deleteAllExternalTransaction();
     }
 
-    @RuLTransactionDefaultUseExisting
+    @RuLTransactionSerializableUseExisting
     public void deleteByVinExternalTransaction(@NotNull final String vin) throws OemRuLException {
         try {
+            if(!isVinExisting(vin)) {
+                throw new OemRuLException("Relation for given vin does not exist!");
+            }
+
             rulVinRelationRepository.deleteByVin(vin);
         } catch (final Exception exception) {
-            throw failed("Deleting VIN relation failed!", exception);
+            throw failed("Deleting VIN relation failed: " + exception.getMessage(), exception);
         }
     }
 
-    @RuLTransactionDefaultCreateNew
+    @RuLTransactionSerializableCreateNew
     public void deleteByVinNewTransaction(@NotNull final String vin) throws OemRuLException {
         deleteByVinExternalTransaction(vin);
     }
 
-    @RuLTransactionDefaultUseExisting
+    private boolean isVinExisting(@NotNull final String vin) throws OemRuLException {
+        return rulVinRelationRepository.queryByVin(vin) != null;
+    }
+
+    @RuLTransactionSerializableUseExisting
     public void deleteByRefIdExternalTransaction(@NotNull final String refId) throws OemRuLException {
         try {
+            if(!isRefIdExisting(refId)) {
+                throw new OemRuLException("Relation for given ref-id does not exist!");
+            }
+
             rulVinRelationRepository.deleteByRefId(refId);
         } catch (final Exception exception) {
-            throw failed("Deleting VIN relation failed!", exception);
+            throw failed("Deleting VIN relation failed: " + exception.getMessage(), exception);
         }
     }
 
-    @RuLTransactionDefaultCreateNew
+    @RuLTransactionSerializableCreateNew
     public void deleteByRefIdNewTransaction(@NotNull final String refId) throws OemRuLException {
         deleteByRefIdExternalTransaction(refId);
+    }
+
+    private boolean isRefIdExisting(@NotNull final String refId) throws OemRuLException {
+        return rulVinRelationRepository.queryByRefId(refId) != null;
     }
 
     @RuLTransactionDefaultUseExisting

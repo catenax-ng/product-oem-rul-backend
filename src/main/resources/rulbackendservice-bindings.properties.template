@@ -12,6 +12,10 @@ edc.apiwrapper.url=http://myapiwrapper.url
 edc.apiwrapper.username=user
 edc.apiwrapper.password=pass
 
+requester.rulresult.endpoint=http://edc.requester.com/endpoint
+requester.bpn=BPN0000REQUESTER
+requester.rulresult.resultAssetName=urn:example:id
+
 supplier.rulservice.endpoint=http://edc.supplier.com/endpoint
 supplier.bpn=BPN0000SUPPLIER
 supplier.rulservice.inputAssetName=urn:example:id

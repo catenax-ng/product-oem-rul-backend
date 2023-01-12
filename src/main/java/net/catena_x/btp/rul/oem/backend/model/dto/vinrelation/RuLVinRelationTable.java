@@ -7,11 +7,20 @@ import org.springframework.stereotype.Component;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
+import java.util.function.Supplier;
 
 @Component
 public class RuLVinRelationTable {
     @Autowired private RuLVinRelationTableInternal internal;
     @Autowired private RuLVinRelationConverter rulVinRelationConverter;
+
+    public Exception runSerializableNewTransaction(@NotNull final Supplier<Exception> function) {
+        return internal.runSerializableNewTransaction(function);
+    }
+
+    public Exception runSerializableExternalTransaction(@NotNull final Supplier<Exception> function) {
+        return internal.runSerializableExternalTransaction(function);
+    }
 
     public void insertNewTransaction(@NotNull final String vin, @NotNull final String refId) throws OemRuLException {
         internal.insertNewTransaction(vin, refId);

@@ -15,11 +15,22 @@ import org.springframework.stereotype.Component;
 import javax.validation.constraints.NotNull;
 import java.time.Instant;
 import java.util.List;
+import java.util.function.Supplier;
 
 @Component
 public class RuLCalculationTableInternal extends RuLTableBase {
     @Autowired private RuLCalculationRepository rulCalculationRepository;
     @Autowired private RuLVinRelationTableInternal rulVinRelationTableInternal;
+
+    @RuLTransactionSerializableUseExisting
+    public Exception runSerializableExternalTransaction(@NotNull final Supplier<Exception> function) {
+        return function.get();
+    }
+
+    @RuLTransactionSerializableCreateNew
+    public Exception runSerializableNewTransaction(@NotNull final Supplier<Exception> function) {
+        return runSerializableExternalTransaction(function);
+    }
 
     @RuLTransactionSerializableUseExisting
     public void resetDbExternalTransaction() throws OemRuLException {
