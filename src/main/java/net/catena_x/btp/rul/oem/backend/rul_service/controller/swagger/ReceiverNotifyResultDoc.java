@@ -30,14 +30,14 @@ There it one result per calculation. The result is mapped to the related calcula
       {
         "componentId": "urn:uuid:4773625a-5e56-4879-abed-475be29bd66b",
         "remainingUsefulLife": {
-          "remainingOperatingTime": "4566",
+          "remainingOperatingHours": 4566,
           "remainingRunningDistance": 1234,
           "determinationLoaddataSource": {
             "informationOriginLoadSpectrum": "testdatacalculated"
           },
           "determinationStatus": {
             "date": "2022-12-20T12:21:55.523230300Z",
-            "operatingTime": "4355",
+            "operatingHours": 4355,
             "mileage": 12345 
           }
         }  

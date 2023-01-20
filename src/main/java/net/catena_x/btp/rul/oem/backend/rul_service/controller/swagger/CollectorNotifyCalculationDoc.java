@@ -22,7 +22,7 @@ related load spectra and starts the extern calculation by sending a calculation 
     "status": "SENT",
     "targetDate": "2022-11-24T22:07:02.611048800Z",
     "timeStamp": "2022-11-24T11:24:36.744320Z",
-    "classification": "RemainingUsefulLifeCalculation"
+    "classification": "RemainingUsefulLifePredictor"
   },
   "content": {
     "vin": "WBAVP11070VR72002"

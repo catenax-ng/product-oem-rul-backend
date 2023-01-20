@@ -20,7 +20,7 @@ public class RuLRequesterMock {
         try {
             System.out.println("Received result for RuL calculation with id "
                     + data.getHeader().getReferencedNotificationID() + ": RuL = ("
-                    + data.getContent().getRul().getRemainingOperatingTime() + " h, "
+                    + String.format("%f", data.getContent().getRul().getRemainingOperatingHours()) + " h, "
                     + data.getContent().getRul().getRemainingRunningDistance() + " km)");
             return apiHelper.ok("Result successfully processed.");
         } catch (final Exception exception) {

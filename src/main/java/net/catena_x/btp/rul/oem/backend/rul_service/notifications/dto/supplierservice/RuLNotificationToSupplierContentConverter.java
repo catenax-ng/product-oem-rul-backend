@@ -18,7 +18,7 @@ public class RuLNotificationToSupplierContentConverter
 
         return new RuLDataToSupplierContent(
                 source.getRequestRefId(),
-                rulInputConverter.toDTO(source.getRulInputs()));
+                rulInputConverter.toDTO(source.getEndurancePredictorInputs()));
     }
 
     protected RuLNotificationToSupplierContentDAO toDAOSourceExists(
@@ -26,7 +26,7 @@ public class RuLNotificationToSupplierContentConverter
 
         return new RuLNotificationToSupplierContentDAO(
                 source.getRequestRefId(),
-                rulInputConverter.toDAO(source.getRulInputs())
+                rulInputConverter.toDAO(source.getEndurancePredictorInputs())
         );
     }
 }

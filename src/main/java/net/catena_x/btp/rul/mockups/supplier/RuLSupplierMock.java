@@ -42,7 +42,7 @@ public class RuLSupplierMock {
 
     public ResponseEntity<DefaultApiResult> runRuLCalculationMock(
                 @NotNull final NotificationDAO<RuLNotificationToSupplierContentDAO> data) {
-        final List<RuLInputDAO> rulInputs = data.getContent().getRulInputs();
+        final List<RuLInputDAO> rulInputs = data.getContent().getEndurancePredictorInputs();
         rulInputs.sort(Comparator.comparing(RuLInputDAO::getComponentId));
 
         final List<RuLOutputDAO> outputs = new ArrayList<>(rulInputs.size());
@@ -112,7 +112,7 @@ public class RuLSupplierMock {
     }
 
     private RemainingUsefulLife generateRemainingUsefulLife() {
-        return new RemainingUsefulLife("4314", 123458,
+        return new RemainingUsefulLife(4314.0f, "4314", 123458,
                         new BammLoaddataSource("loggedOEM", "loggedOEM"),
                         new BammStatus(Instant.now() , "840", 840.0f, 99331));
     }

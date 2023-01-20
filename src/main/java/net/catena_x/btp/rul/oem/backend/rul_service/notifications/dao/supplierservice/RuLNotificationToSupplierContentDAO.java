@@ -14,5 +14,5 @@ import java.util.List;
 @AllArgsConstructor
 public class RuLNotificationToSupplierContentDAO {
     private String requestRefId;
-    private List<RuLInputDAO> rulInputs;
+    private List<RuLInputDAO> endurancePredictorInputs;
 }

@@ -14,5 +14,5 @@ import java.util.List;
 @AllArgsConstructor
 public class RuLDataToSupplierContent {
     private String requestRefId;
-    private List<RuLInput> rulInputs;
+    private List<RuLInput> endurancePredictorInputs;
 }
