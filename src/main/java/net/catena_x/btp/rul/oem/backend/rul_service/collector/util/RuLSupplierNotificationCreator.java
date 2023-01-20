@@ -55,7 +55,7 @@ public class RuLSupplierNotificationCreator {
     }
 
     private void setRequestDependentData(@NotNull final NotificationHeader headerInOut) {
-        headerInOut.setClassification(NotificationClassification.RULRESULT.toString());
+        headerInOut.setClassification(NotificationClassification.RULSERVICETOSUPPLIER.toString());
         headerInOut.setSeverity(NFSeverity.MINOR);
         headerInOut.setStatus(NFStatus.SENT);
         headerInOut.setTimeStamp(Instant.now());
