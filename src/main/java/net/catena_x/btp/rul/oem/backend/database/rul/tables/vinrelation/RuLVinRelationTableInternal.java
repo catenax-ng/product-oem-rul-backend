@@ -8,7 +8,10 @@ import net.catena_x.btp.rul.oem.backend.database.rul.annotations.RuLTransactionD
 import net.catena_x.btp.rul.oem.backend.database.rul.annotations.RuLTransactionSerializableCreateNew;
 import net.catena_x.btp.rul.oem.backend.database.rul.annotations.RuLTransactionSerializableUseExisting;
 import net.catena_x.btp.rul.oem.backend.database.rul.base.RuLTableBase;
+import net.catena_x.btp.rul.oem.backend.database.rul.tables.calculation.RuLCalculationTableInternal;
 import net.catena_x.btp.rul.oem.util.exceptions.OemRuLException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -20,6 +23,8 @@ import java.util.function.Supplier;
 public class RuLVinRelationTableInternal extends RuLTableBase {
     @Autowired private RuLVinRelationRepository rulVinRelationRepository;
     @Autowired private VehicleTable vehicleTable;
+
+    private final Logger logger = LoggerFactory.getLogger(RuLVinRelationTableInternal.class);
 
     @RuLTransactionSerializableUseExisting
     public Exception runSerializableExternalTransaction(@NotNull final Supplier<Exception> function) {
@@ -42,6 +47,8 @@ public class RuLVinRelationTableInternal extends RuLTableBase {
 
             rulVinRelationRepository.insert(vin, refId);
         } catch (final Exception exception) {
+            logger.error(exception.getMessage());
+            exception.printStackTrace();
             throw failed("Inserting VIN relation failed: " + exception.getMessage(), exception);
         }
     }
@@ -60,6 +67,8 @@ public class RuLVinRelationTableInternal extends RuLTableBase {
         try {
             rulVinRelationRepository.deleteAll();
         } catch (final Exception exception) {
+            logger.error(exception.getMessage());
+            exception.printStackTrace();
             throw failed("Deleting all VIN relations failed: " + exception.getMessage(), exception);
         }
     }
@@ -78,6 +87,8 @@ public class RuLVinRelationTableInternal extends RuLTableBase {
 
             rulVinRelationRepository.deleteByVin(vin);
         } catch (final Exception exception) {
+            logger.error(exception.getMessage());
+            exception.printStackTrace();
             throw failed("Deleting VIN relation failed: " + exception.getMessage(), exception);
         }
     }
@@ -100,6 +111,8 @@ public class RuLVinRelationTableInternal extends RuLTableBase {
 
             rulVinRelationRepository.deleteByRefId(refId);
         } catch (final Exception exception) {
+            logger.error(exception.getMessage());
+            exception.printStackTrace();
             throw failed("Deleting VIN relation failed: " + exception.getMessage(), exception);
         }
     }
@@ -118,7 +131,9 @@ public class RuLVinRelationTableInternal extends RuLTableBase {
         try {
             return rulVinRelationRepository.queryAll();
         } catch (final Exception exception) {
-            throw failed("Querying VIN relations failed!", exception);
+            logger.error(exception.getMessage());
+            exception.printStackTrace();
+            throw failed("Querying VIN relations failed! " + exception.getMessage(), exception);
         }
     }
 
@@ -132,7 +147,9 @@ public class RuLVinRelationTableInternal extends RuLTableBase {
         try {
             return rulVinRelationRepository.queryByVin(vin);
         } catch (final Exception exception) {
-            throw failed("Querying VIN relation failed!", exception);
+            logger.error(exception.getMessage());
+            exception.printStackTrace();
+            throw failed("Querying VIN relation failed! " + exception.getMessage(), exception);
         }
     }
 
@@ -146,7 +163,9 @@ public class RuLVinRelationTableInternal extends RuLTableBase {
         try {
             return rulVinRelationRepository.queryByRefId(refId);
         } catch (final Exception exception) {
-            throw failed("Querying VIN relation failed!", exception);
+            logger.error(exception.getMessage());
+            exception.printStackTrace();
+            throw failed("Querying VIN relation failed! " + exception.getMessage(), exception);
         }
     }
 

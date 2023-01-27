@@ -1,5 +1,6 @@
 package net.catena_x.btp.rul.oem.backend.database.rul.tables.calculation;
 
+import net.catena_x.btp.libraries.oem.backend.database.rawdata.dao.tables.infoitem.InfoTableInternal;
 import net.catena_x.btp.rul.oem.backend.database.rul.annotations.RuLTransactionDefaultCreateNew;
 import net.catena_x.btp.rul.oem.backend.database.rul.annotations.RuLTransactionDefaultUseExisting;
 import net.catena_x.btp.rul.oem.backend.database.rul.annotations.RuLTransactionSerializableCreateNew;
@@ -9,6 +10,8 @@ import net.catena_x.btp.rul.oem.backend.database.rul.tables.vinrelation.RuLVinRe
 import net.catena_x.btp.rul.oem.backend.model.enums.RuLCalculationStatus;
 import net.catena_x.btp.rul.oem.util.exceptions.OemRuLException;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -21,6 +24,8 @@ import java.util.function.Supplier;
 public class RuLCalculationTableInternal extends RuLTableBase {
     @Autowired private RuLCalculationRepository rulCalculationRepository;
     @Autowired private RuLVinRelationTableInternal rulVinRelationTableInternal;
+
+    private final Logger logger = LoggerFactory.getLogger(RuLCalculationTableInternal.class);
 
     @RuLTransactionSerializableUseExisting
     public Exception runSerializableExternalTransaction(@NotNull final Supplier<Exception> function) {
@@ -51,7 +56,9 @@ public class RuLCalculationTableInternal extends RuLTableBase {
         try {
             rulCalculationRepository.insert(id, requesterNotificationId, calculationTimestamp, status.toString(), rul);
         } catch (final Exception exception) {
-            throw failed("Inserting calculation failed!", exception);
+            logger.error(exception.getMessage());
+            exception.printStackTrace();
+            throw failed("Inserting calculation failed! " + exception.getMessage(), exception);
         }
     }
 
@@ -74,7 +81,9 @@ public class RuLCalculationTableInternal extends RuLTableBase {
             rulCalculationRepository.insert(id, requesterNotificationId, calculationTimestamp, status.toString(), rul);
             return id;
         } catch (final Exception exception) {
-            throw failed("Inserting calculation failed!", exception);
+            logger.error(exception.getMessage());
+            exception.printStackTrace();
+            throw failed("Inserting calculation failed! " + exception.getMessage(), exception);
         }
     }
 
@@ -93,7 +102,9 @@ public class RuLCalculationTableInternal extends RuLTableBase {
             rulCalculationRepository.createNow(
                     id, requesterNotificationId, RuLCalculationStatus.CREATED.toString(), null);
         } catch (final Exception exception) {
-            throw failed("Inserting calculation failed!", exception);
+            logger.error(exception.getMessage());
+            exception.printStackTrace();
+            throw failed("Inserting calculation failed! " + exception.getMessage(), exception);
         }
     }
 
@@ -112,7 +123,9 @@ public class RuLCalculationTableInternal extends RuLTableBase {
                     id, requesterNotificationId, RuLCalculationStatus.CREATED.toString(), null);
             return id;
         } catch (final Exception exception) {
-            throw failed("Inserting calculation failed!", exception);
+            logger.error(exception.getMessage());
+            exception.printStackTrace();
+            throw failed("Inserting calculation failed! " + exception.getMessage(), exception);
         }
     }
 
@@ -128,7 +141,9 @@ public class RuLCalculationTableInternal extends RuLTableBase {
         try {
             rulCalculationRepository.updateStatus(id, newStatus.toString());
         } catch (final Exception exception) {
-            throw failed("Updating calculation status failed!", exception);
+            logger.error(exception.getMessage());
+            exception.printStackTrace();
+            throw failed("Updating calculation status failed! " + exception.getMessage(), exception);
         }
     }
 
@@ -145,7 +160,9 @@ public class RuLCalculationTableInternal extends RuLTableBase {
         try {
             rulCalculationRepository.updateStatusAndRuL(id, newStatus.toString(), rul);
         } catch (final Exception exception) {
-            throw failed("Updating calculation status and RuL failed!", exception);
+            logger.error(exception.getMessage());
+            exception.printStackTrace();
+            throw failed("Updating calculation status and RuL failed! " + exception.getMessage(), exception);
         }
     }
 
@@ -161,7 +178,9 @@ public class RuLCalculationTableInternal extends RuLTableBase {
         try {
             rulCalculationRepository.deleteAll();
         } catch (final Exception exception) {
-            throw failed("Deleting all calculations failed!", exception);
+            logger.error(exception.getMessage());
+            exception.printStackTrace();
+            throw failed("Deleting all calculations failed! " + exception.getMessage(), exception);
         }
     }
 
@@ -175,7 +194,9 @@ public class RuLCalculationTableInternal extends RuLTableBase {
         try {
             rulCalculationRepository.deleteById(id);
         } catch (final Exception exception) {
-            throw failed("Deleting calculation failed!", exception);
+            logger.error(exception.getMessage());
+            exception.printStackTrace();
+            throw failed("Deleting calculation failed! " + exception.getMessage(), exception);
         }
     }
 
@@ -190,7 +211,9 @@ public class RuLCalculationTableInternal extends RuLTableBase {
         try {
             rulCalculationRepository.deleteByRequesterNotificationId(requesterNotificationId);
         } catch (final Exception exception) {
-            throw failed("Deleting calculation failed!", exception);
+            logger.error(exception.getMessage());
+            exception.printStackTrace();
+            throw failed("Deleting calculation failed! " + exception.getMessage(), exception);
         }
     }
 
@@ -206,7 +229,9 @@ public class RuLCalculationTableInternal extends RuLTableBase {
         try {
             rulCalculationRepository.deleteByStatus(status.toString());
         } catch (final Exception exception) {
-            throw failed("Deleting calculation failed!", exception);
+            logger.error(exception.getMessage());
+            exception.printStackTrace();
+            throw failed("Deleting calculation failed! " + exception.getMessage(), exception);
         }
     }
 
@@ -220,7 +245,9 @@ public class RuLCalculationTableInternal extends RuLTableBase {
         try {
             rulCalculationRepository.deleteCalculatedUntil(calculatedUntil);
         } catch (final Exception exception) {
-            throw failed("Deleting calculation failed!", exception);
+            logger.error(exception.getMessage());
+            exception.printStackTrace();
+            throw failed("Deleting calculation failed! " + exception.getMessage(), exception);
         }
     }
 
@@ -235,7 +262,9 @@ public class RuLCalculationTableInternal extends RuLTableBase {
         try {
             return rulCalculationRepository.queryAll();
         } catch (final Exception exception) {
-            throw failed("Querying calculations failed!", exception);
+            logger.error(exception.getMessage());
+            exception.printStackTrace();
+            throw failed("Querying calculations failed! " + exception.getMessage(), exception);
         }
     }
 
@@ -249,7 +278,9 @@ public class RuLCalculationTableInternal extends RuLTableBase {
         try {
             return rulCalculationRepository.queryById(id);
         } catch (final Exception exception) {
-            throw failed("Querying calculation by id failed!", exception);
+            logger.error(exception.getMessage());
+            exception.printStackTrace();
+            throw failed("Querying calculation by id failed! " + exception.getMessage(), exception);
         }
     }
 
@@ -264,7 +295,9 @@ public class RuLCalculationTableInternal extends RuLTableBase {
         try {
             return rulCalculationRepository.queryByRequesterNotificationId(requesterNotificationId);
         } catch (final Exception exception) {
-            throw failed("Querying calculation by requester notification id failed!", exception);
+            logger.error(exception.getMessage());
+            exception.printStackTrace();
+            throw failed("Querying calculation by requester notification id failed! " + exception.getMessage(), exception);
         }
     }
 
@@ -280,7 +313,9 @@ public class RuLCalculationTableInternal extends RuLTableBase {
         try {
             return rulCalculationRepository.queryByStatus(status.toString());
         } catch (final Exception exception) {
-            throw failed("Querying calculations by status failed!", exception);
+            logger.error(exception.getMessage());
+            exception.printStackTrace();
+            throw failed("Querying calculations by status failed! " + exception.getMessage(), exception);
         }
     }
 
@@ -295,7 +330,7 @@ public class RuLCalculationTableInternal extends RuLTableBase {
         try {
             return rulCalculationRepository.queryAllOrderByCalculationTimestamp();
         } catch (final Exception exception) {
-            throw failed("Querying calculations failed!", exception);
+            throw failed("Querying calculations failed! " + exception.getMessage(), exception);
         }
     }
 
@@ -310,7 +345,7 @@ public class RuLCalculationTableInternal extends RuLTableBase {
         try {
             return rulCalculationRepository.queryByCalculationSince(calculationTimestampSince);
         } catch (final Exception exception) {
-            throw failed("Querying calculations failed!", exception);
+            throw failed("Querying calculations failed! " + exception.getMessage(), exception);
         }
     }
 
@@ -326,7 +361,7 @@ public class RuLCalculationTableInternal extends RuLTableBase {
         try {
             return rulCalculationRepository.queryByCalculationUntil(calculationTimestampUntil);
         } catch (final Exception exception) {
-            throw failed("Querying calculations failed!", exception);
+            throw failed("Querying calculations failed! " + exception.getMessage(), exception);
         }
     }
 
