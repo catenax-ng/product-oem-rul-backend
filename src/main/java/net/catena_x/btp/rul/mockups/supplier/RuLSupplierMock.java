@@ -68,7 +68,7 @@ public class RuLSupplierMock {
             final HttpUrl requestUrl = HttpUrl.parse("http://localhost:25554/")
                     .newBuilder().addPathSegment("ruldatareceiver").addPathSegment("notifyresult").build();
 
-            HttpHeaders headers = generateDefaultHeaders();
+            final HttpHeaders headers = generateDefaultHeaders();
             addAuthorizationHeaders(headers);
 
             final HttpEntity<Notification<RuLNotificationFromSupplierContentDAO>> request =
