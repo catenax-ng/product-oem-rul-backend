@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import javax.validation.constraints.NotNull;
+import java.util.Locale;
 
 @Component
 public class RuLRequesterMock {
@@ -20,7 +21,7 @@ public class RuLRequesterMock {
         try {
             System.out.println("Received result for RuL calculation with id "
                     + data.getHeader().getReferencedNotificationID() + ": RuL = ("
-                    + String.format("%f", data.getContent().getRul().getRemainingOperatingHours()) + " h, "
+                    + String.format(Locale.US, "%f", data.getContent().getRul().getRemainingOperatingHours()) + " h, "
                     + data.getContent().getRul().getRemainingRunningDistance() + " km)");
             return apiHelper.ok("Result successfully processed.");
         } catch (final Exception exception) {

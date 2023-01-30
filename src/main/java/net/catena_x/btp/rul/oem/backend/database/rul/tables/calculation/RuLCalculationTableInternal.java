@@ -1,6 +1,5 @@
 package net.catena_x.btp.rul.oem.backend.database.rul.tables.calculation;
 
-import net.catena_x.btp.libraries.oem.backend.database.rawdata.dao.tables.infoitem.InfoTableInternal;
 import net.catena_x.btp.rul.oem.backend.database.rul.annotations.RuLTransactionDefaultCreateNew;
 import net.catena_x.btp.rul.oem.backend.database.rul.annotations.RuLTransactionDefaultUseExisting;
 import net.catena_x.btp.rul.oem.backend.database.rul.annotations.RuLTransactionSerializableCreateNew;

@@ -8,7 +8,6 @@ import net.catena_x.btp.rul.oem.backend.database.rul.annotations.RuLTransactionD
 import net.catena_x.btp.rul.oem.backend.database.rul.annotations.RuLTransactionSerializableCreateNew;
 import net.catena_x.btp.rul.oem.backend.database.rul.annotations.RuLTransactionSerializableUseExisting;
 import net.catena_x.btp.rul.oem.backend.database.rul.base.RuLTableBase;
-import net.catena_x.btp.rul.oem.backend.database.rul.tables.calculation.RuLCalculationTableInternal;
 import net.catena_x.btp.rul.oem.util.exceptions.OemRuLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
