@@ -26,7 +26,7 @@ import org.springframework.context.annotation.ComponentScan;
 		"net.catena_x.btp.libraries.edc",
 		"net.catena_x.btp.libraries.oem.backend.database",
 		"net.catena_x.btp.libraries.util.security"})
-@OpenAPIDefinition(info = @Info(title = "OEM rul backend service", version = "0.0.99"))
+@OpenAPIDefinition(info = @Info(title = "OEM rul backend service", version = "0.1.0"))
 public class OemRulBackendServiceApplication {
 	public static void main(String[] args) {
 		new SpringApplicationBuilder()
