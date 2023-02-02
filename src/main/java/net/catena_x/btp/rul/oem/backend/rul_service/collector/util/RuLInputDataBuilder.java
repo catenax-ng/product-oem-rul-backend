@@ -3,6 +3,7 @@ package net.catena_x.btp.rul.oem.backend.rul_service.collector.util;
 import net.catena_x.btp.libraries.bamm.custom.classifiedloadspectrum.ClassifiedLoadSpectrum;
 import net.catena_x.btp.libraries.bamm.custom.classifiedloadspectrum.items.LoadSpectrumType;
 import net.catena_x.btp.libraries.oem.backend.model.dto.vehicle.Vehicle;
+import net.catena_x.btp.rul.oem.backend.rul_service.collector.util.exceptions.OemRuLLoadSpectrumNotFoundException;
 import net.catena_x.btp.rul.oem.backend.rul_service.notifications.dto.supplierservice.RuLDataToSupplierContent;
 import net.catena_x.btp.rul.oem.backend.rul_service.notifications.dto.supplierservice.items.RuLInput;
 import net.catena_x.btp.rul.oem.util.exceptions.OemRuLException;
@@ -48,8 +49,9 @@ public class RuLInputDataBuilder {
         if(loadSpectrumGearSetMissing && loadSpectrumGearOilMissing) {
             return null;
         } else if(loadSpectrumGearSetMissing || loadSpectrumGearOilMissing) {
-            throw new OemRuLException("Load spectrum for gear " + (loadSpectrumGearSetMissing? "set" :"oil" )
-                                                                            + " not included in telematics data!");
+            throw new OemRuLLoadSpectrumNotFoundException("Load spectrum for gear "
+                                                                + (loadSpectrumGearSetMissing? "set" :"oil" )
+                                                                + " not included in telematics data!");
         }
 
         return rulInput;
@@ -65,6 +67,6 @@ public class RuLInputDataBuilder {
             }
         }
 
-        throw new OemRuLException("Load spectrum with required type not found!");
+        throw new OemRuLLoadSpectrumNotFoundException("Load spectrum with required type not found!");
     }
 }

@@ -73,14 +73,9 @@ public class RuLBackendCollectorControllerNotifyCalculation {
                             ))
             }
     )
-
-    public ResponseEntity<String> notifyCalculation(
+    public ResponseEntity<RuLStarterApiResult> notifyCalculation(
             @RequestBody @NotNull NotificationDAO<RuLNotificationFromRequesterContentDAO> request) {
-        try {
-            return rulCalculationStarter.startCalculation(request.getHeader().getNotificationID(),
+        return rulCalculationStarter.startCalculation(request.getHeader().getNotificationID(),
                     rulNotificationFromRequesterContentConverter.toDTO(request.getContent()));
-        } catch(final Exception exception){
-            return apiHelper.failedAsString("Starting calculation failed: " + exception.getMessage());
-        }
     }
 }

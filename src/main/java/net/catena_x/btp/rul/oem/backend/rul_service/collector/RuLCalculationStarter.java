@@ -12,6 +12,7 @@ import net.catena_x.btp.rul.oem.backend.model.dto.calculation.RuLCalculationTabl
 import net.catena_x.btp.rul.oem.backend.model.enums.RuLCalculationStatus;
 import net.catena_x.btp.rul.oem.backend.rul_service.collector.util.RuLInputDataBuilder;
 import net.catena_x.btp.rul.oem.backend.rul_service.collector.util.RuLSupplierNotificationCreator;
+import net.catena_x.btp.rul.oem.backend.rul_service.collector.util.exceptions.*;
 import net.catena_x.btp.rul.oem.backend.rul_service.notifications.dto.requester.RuLNotificationFromRequesterContent;
 import net.catena_x.btp.rul.oem.backend.rul_service.notifications.dto.supplierservice.RuLDataToSupplierContent;
 import net.catena_x.btp.rul.oem.backend.rul_service.notifications.dto.supplierservice.RuLNotificationToSupplierConverter;
@@ -51,27 +52,38 @@ public class RuLCalculationStarter {
 
     private final Logger logger = LoggerFactory.getLogger(RuLCalculationStarter.class);
 
-    public ResponseEntity<String> startCalculation(
+    public ResponseEntity<RuLStarterApiResult> startCalculation(
             @NotNull final String requesterNotificationId,
-            @NotNull final RuLNotificationFromRequesterContent requesterNotificatonContent) throws OemRuLException {
+            @NotNull final RuLNotificationFromRequesterContent requesterNotificationContent) {
 
         try {
-            final Vehicle vehicle = getVehicleByVIN(requesterNotificatonContent.getVin());
+            final Vehicle vehicle = getVehicleByVIN(requesterNotificationContent.getVin());
 
             final String requestId = generateRequestId();
             final RuLDataToSupplierContent dataToSupplierContent = rulInputDataBuilder.build(requestId, vehicle);
 
             if(dataToSupplierContent == null) {
-                return noDataForVehicle(requesterNotificatonContent.getVin());
+                throw noDataForVehicle(requesterNotificationContent.getVin());
             }
 
             createNewCalculationInDatabase(requestId, requesterNotificationId);
             dispatchRequestWithHttp(requestId, dataToSupplierContent);
+        } catch(final OemRuLLoadSpectrumNotFoundException exception) {
+            return failed(RuLStarterCalculationType.REQUIRED_LOAD_SPECTRUM_TYPE_NOT_FOUND, exception.getMessage());
+        } catch(final OemRuLNoDataForVehicleException exception) {
+            return failed(RuLStarterCalculationType.NO_DATA_FOR_VEHICLE, exception.getMessage());
+        } catch(final OemRuLNoVinGivenException exception) {
+            return failed(RuLStarterCalculationType.NO_VIN_GIVEN, exception.getMessage());
+        } catch(final OemRuLSupplierCalculationServiceFailedException exception) {
+            return failed(RuLStarterCalculationType.SUPPLIER_CALCULATION_SERVICE_FAILED, exception.getMessage());
+        } catch(final OemRuLUnknownVehicleException exception) {
+            return failed(RuLStarterCalculationType.UNKNOWN_VEHICLE, exception.getMessage());
         } catch(final Exception exception) {
-            return apiHelper.failedAsString("Starting RuL calculation failed: " + exception.getMessage());
+            return failed(RuLStarterCalculationType.INTERNAL_ERROR, exception.getMessage());
         }
 
-        return ok(RuLStarterCalculationType.OK_CALCULATING, "Started RuL calculation successfully.");
+        return ok(RuLStarterCalculationType.OK_SUPPLIER_CALCULATION_SERVICE_STARTED,
+                "Started RuL calculation successfully.");
     }
 
     @NotNull
@@ -79,13 +91,18 @@ public class RuLCalculationStarter {
         return UUID.randomUUID().toString();
     }
 
-    private ResponseEntity<String> noDataForVehicle(@NotNull final String vin) {
-        return ok(RuLStarterCalculationType.OK_NO_DATA,
-                "Vehicle with vin " + vin + " has no load collectives for RuL calculation.");
+    private OemRuLNoDataForVehicleException noDataForVehicle(@NotNull final String vin) {
+        return new OemRuLNoDataForVehicleException("Vehicle with vin " + vin
+                                                            + " has no load collectives for RuL calculation.");
     }
 
-    private ResponseEntity<String> ok(final RuLStarterCalculationType type, final String info) {
-        return apiHelper.okAsString(new RuLStarterApiResult(Instant.now(), type, info), RuLStarterApiResult.class);
+    private ResponseEntity<RuLStarterApiResult> ok(final RuLStarterCalculationType type, final String info) {
+        return apiHelper.accepted(new RuLStarterApiResult(Instant.now(), type, info));
+    }
+
+    private ResponseEntity<RuLStarterApiResult> failed(final RuLStarterCalculationType type, final String info) {
+        return apiHelper.ok(new RuLStarterApiResult(Instant.now(), type,
+                    "Starting RuL calculation failed: " + info));
     }
 
     private Vehicle getVehicleByVIN(final String vin) throws OemRuLException {
@@ -105,13 +122,13 @@ public class RuLCalculationStarter {
 
     private void checkVehicleFound(final Vehicle vehicle, final String vin) throws OemRuLException {
         if(vehicle == null) {
-            throw new OemRuLException("No vehicle found to corresponding vin " + vin);
+            throw new OemRuLUnknownVehicleException("No vehicle found to corresponding vin " + vin);
         }
     }
 
     private void assertVIN(final String vin) throws OemRuLException {
         if(vin == null) {
-            throw new OemRuLException("No vin given!");
+            throw new OemRuLNoVinGivenException("No vin given!");
         }
     }
 
@@ -158,9 +175,10 @@ public class RuLCalculationStarter {
             logger.info("External calculation service for id " + requestId + " started.");
             setCalculationStatus(requestId, RuLCalculationStatus.RUNNING);
         } else {
-            serviceCallFailed("Starting external calculation service for id \" + requestId + \" failed: "
-                    + "http code " + result.getStatusCode().toString() + ", response body: "
-                    + result.getBody().toString());
+            throw new OemRuLSupplierCalculationServiceFailedException(
+                        "Starting external calculation service for id \" + requestId + \" failed: "
+                                    + "http code " + result.getStatusCode().toString() + ", response body: "
+                                    + result.getBody().toString());
         }
     }
 
@@ -169,11 +187,6 @@ public class RuLCalculationStarter {
             throws OemRuLException {
         return startAsyncRequest(requestId, supplierRuLServiceEndpoint.toString(), inputAssetName,
                 rulNotificationToSupplierConverter.toDAO(notification), JsonNode.class);
-    }
-
-    private void serviceCallFailed(@NotNull final String errorText) throws OemRuLException {
-        logger.error(errorText);
-        throw new OemRuLException(errorText);
     }
 
     public <BodyType, ResponseType> ResponseEntity<ResponseType> startAsyncRequest(
@@ -186,7 +199,7 @@ public class RuLCalculationStarter {
                     messageBody, generateDefaultHeaders());
         } catch (final EdcException exception) {
             setCalculationStatus(requestId, RuLCalculationStatus.FAILED_EXTERNAL);
-            throw new OemRuLException(exception);
+            throw new OemRuLSupplierCalculationServiceFailedException(exception);
         }
     }
 
