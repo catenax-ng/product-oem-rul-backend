@@ -20,6 +20,7 @@ public class RuLSupplierNotificationCreator {
     @Value("${supplier.bpn}") private String supplierBpn;
     @Value("${edc.bpn}") private String edcBpn;
     @Value("${edc.endpoint}") private URL edcEndpoint;
+    @Value("${rulservice.respondAssetId:test}") private String respondAssetId;
 
     public Notification<RuLDataToSupplierContent> createForHttp(
             @NotNull final String requestId,
@@ -47,6 +48,7 @@ public class RuLSupplierNotificationCreator {
     private void setSenderData(@NotNull final NotificationHeader headerInOut) {
         headerInOut.setSenderBPN(edcBpn);
         headerInOut.setSenderAddress(edcEndpoint.toString());
+        headerInOut.setRespondAssetId(respondAssetId);
     }
 
     private void setRecipientData(@NotNull final NotificationHeader headerInOut) {
@@ -55,7 +57,8 @@ public class RuLSupplierNotificationCreator {
     }
 
     private void setRequestDependentData(@NotNull final NotificationHeader headerInOut) {
-        headerInOut.setClassification(NotificationClassification.RULSERVICETOSUPPLIER.toString());
+        headerInOut.setClassification("RemainingUsefulLifePredictor"
+                /*NotificationClassification.RULSERVICETOSUPPLIER.toString()*/);
         headerInOut.setSeverity(NFSeverity.MINOR);
         headerInOut.setStatus(NFStatus.SENT);
         headerInOut.setTimeStamp(Instant.now());
