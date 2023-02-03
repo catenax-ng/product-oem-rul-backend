@@ -12,7 +12,7 @@ Asset id. This id is used to determine the class to call.
 
     public static final String ASSETID_EXAMPLE_1_NAME = "Asset id";
     public static final String ASSETID_EXAMPLE_1_DESCRIPTION = "Asset id.";
-    public static final String ASSETID_EXAMPLE_1_VALUE = "0465467e-b4aa-4aaf-ab3f-6211da401ab";
+    public static final String ASSETID_EXAMPLE_1_VALUE = "urn:uuid:17937c84-000b-4520-9830-ba86934850e3";
 
     public static final String PROVIDERCONNECTORURL_DESCRIPTION = """
 Url of the provider connector (not used in the mock up).
@@ -29,158 +29,100 @@ Url of the provider connector (not used in the mock up).
     public static final String BODY_EXAMPLE_1_VALUE = """
 {
   "header": {
-    "notificationID": "29bf37dd-90d3-4759-a17e-7c02234b6c62",
+    "notificationID": "98f507d5-175d-4945-8d06-6aa1fcef9a0c",
     "senderBPN": "BPN0000OEM",
-    "senderAddress": "https://oem.com/edc",
+    "senderAddress": "https://connector2.cp.int.adac.openresearch.com",
+    "recipientAddress": "https://supplier.com/edc",
     "recipientBPN": "BPN0000SUPPLIER",
-    "recipientAddress": "http://edc.supplier.com/endpoint",
-    "classification": "HISERVICE",
     "severity": "MINOR",
     "status": "SENT",
-    "targetDate": "2022-12-21T00:44:52.597897100Z",
-    "timeStamp": "2022-12-20T12:44:52.597897100Z"
+    "targetDate": "2022-11-24T22:07:02.611048800Z",
+    "timeStamp": "2022-11-24T11:24:36.744320Z",
+    "classification": "RemainingUsefulLifePredictor",
+    "respondAssetId": "test"
   },
   "content": {
-    "requestRefId": "29bf37dd-90d3-4759-a17e-7c02234b6c62",
-    "healthIndicatorInputs": [
+    "requestRefId": "98f507d5-175d-4945-8d06-6aa1fcef9a0c",
+    "endurancePredictorInputs": [
       {
-        "componentId": "urn:uuid:aaa7a395-5495-49a3-8ad7-3a66f25d388d",
-        "classifiedLoadSpectrum": {
-          "targetComponentID": "urn:uuid:b92d110a-00e9-49a5-9cde-5759bc277de0",
+        "componentId": "urn:uuid:b43a1fab-f460-4d24-b078-e58a0247ad1e",
+        "classifiedLoadSpectrumGearSet": {
+          "targetComponentID": "urn:uuid:1d161134-8bd4-4253-8735-304852d1d17b",
           "metadata": {
-            "projectDescription": "projectnumber Landstrasse",
-            "componentDescription": "Clutch",
-            "routeDescription": "logged",
-            "status": {
-              "date": "2022-08-21T00:00:00Z",
-              "operatingHours": 1281.9,
-              "mileage": 76543
-            }
-          },
-          "header": {
-            "countingValue": "Time",
-            "countingUnit": "unit:secondUnitOfTime",
-            "countingMethod": "TimeAtLevel",
-            "channels": [
-              {
-                "unit": "unit:degreeCelsius",
-                "numberOfBins": 8,
-                "channelName": "TC_Clutch",
-                "upperLimit": 320.0,
-                "lowerLimit": 0.0
+              "projectDescription": "projectnumber Stadt",
+              "componentDescription": "GearSet",
+              "routeDescription": "logged",
+              "status": {
+                "date": "2022-08-11T09:22:11.999+01:00",
+                "operatingHours": 3213.9,
+                "mileage": 65432
               }
-            ]
-          },
-          "body": {
-            "counts": {
-              "countsName": "Time",
-              "countsList": [
-                3018.21, 3451252.83, 699160.662, 349580.331, 116526.777]
             },
-            "classes": [
-              {
-                "className": "TC_Clutch-class",
-                "classList": [2, 3, 4, 5, 6]
-              }
-            ]
+              "header": {
+              "countingMethod": "LRD",
+              "channels": [
+                  {
+                      "channelName": "N_TU",
+                      "unit": "unit:rpm",
+                      "lowerLimit": -100.0,
+                      "upperLimit": 12700.0,
+                      "numberOfBins": 128
+                  },
+                  {
+                      "channelName": "T_TU",
+                      "unit": "unit:Nm",
+                      "lowerLimit": -1270.0,
+                      "upperLimit": 1290.0,
+                      "numberOfBins": 128
+                  },
+                  {
+                      "channelName": "Z_GANG",
+                      "unit": "unit:ONE",
+                      "lowerLimit": -0.5,
+                      "upperLimit": 9.5,
+                      "numberOfBins": 10
+                  }
+              ],
+              "countingUnit": "unit:ONE"
           },
-          "bammId": "urn:bamm:io.openmanufacturing.digitaltwin:1.0.0#ClassifiedLoadSpectrum"
-        },
-        "adaptionValueList": {
-          "version": "DV_0.0.99",
-          "timestamp": "2022-08-11T00:00:00Z",
-          "mileage_km": 65432.0,
-          "operatingtime_s": 11570040,
-          "values": [0.5, 16554.6, 234.3, 323.0]
-        }
+          "body": { "classes": [\s
+              { "className": "N_TU-class", "classList": [1]},
+              {"className": "T_TU-class", "classList": [68]},
+              {"className": "Z_GANG-class", "classList": [1]}], "counts":{
+              "countsName":"Counts", "countsList": [0.42145895]}
+          }
       },
-      {
-        "componentId": "urn:uuid:13673040-413b-44e1-b1bd-ab09125da513",
-        "classifiedLoadSpectrum": {
-          "targetComponentID": "urn:uuid:84db4c59-5fa1-4266-9e4c-94bea3cf72a4",
+        "classifiedLoadSpectrumGearOil": {
+          "targetComponentID": "urn:uuid:1d161134-8bd4-4253-8735-304852d1d17b",
           "metadata": {
-            "projectDescription": "projectnumber BAB",
-            "componentDescription": "Clutch",
-            "routeDescription": "logged",
-            "status": {
-              "date": "2022-03-15T00:00:00Z",
-              "operatingHours": 262.6,
-              "mileage": 23456
-            }
-          },
-          "header": {
-            "countingValue": "Time",
-            "countingUnit": "unit:secondUnitOfTime",
-            "countingMethod": "TimeAtLevel",
-            "channels": [
-              {
-                "unit": "unit:degreeCelsius",
-                "numberOfBins": 8,
-                "channelName": "TC_Clutch",
-                "upperLimit": 320.0,
-                "lowerLimit": 0.0
+              "projectDescription": "projectnumber Stadt",
+              "componentDescription": "GearOil",
+              "routeDescription": "logged",
+              "status": {
+                "date": "2022-08-11T10:42:14.213+01:00",
+                "operatingHours": 3213.9,
+                "mileage": 65432
               }
-            ]
-          },
-          "body": {
-            "counts": {
-              "countsName": "Time",
-              "countsList": [769.6, 15222.4, 631520.8, 304929.6, 196.8]
             },
-            "classes": [
-              {
-                "className": "TC_Clutch-class",
-                "classList": [2, 3, 4, 5, 6]
-              }
-            ]
+            "header": {
+              "countingMethod": "TimeAtLevel",
+              "channels": [
+                  {
+                      "channelName": "TC_SU",
+                      "unit": "unit:degreeCelsius",
+                      "lowerLimit": 0.0,
+                      "upperLimit": 640.0,
+                      "numberOfBins": 128
+                  }
+              ],
+              "countingValue": "Time",
+              "countingUnit": "unit:secondUnitOfTime"
           },
-          "bammId": "urn:bamm:io.openmanufacturing.digitaltwin:1.0.0#ClassifiedLoadSpectrum"
-        },
-        "adaptionValueList": {
-          "version": "DV_0.0.99",
-          "timestamp": "2022-08-11T00:00:00Z",
-          "mileage_km": 65432.0,
-          "operatingtime_s": 11570040,
-          "values": [0.5, 16554.6, 234.3, 323.0]
-        }
-      },
-      {
-        "componentId": "urn:uuid:b6309b8a-20c0-4e7d-b782-a7c303bb7da4",
-        "classifiedLoadSpectrum": {
-          "targetComponentID": "urn:uuid:cd0f9c56-5687-4c10-ac36-56693caa5366",
-          "metadata": {
-            "projectDescription": "projectnumber Stadt",
-            "componentDescription": "Clutch",
-            "routeDescription": "logged",
-            "status": {
-              "date": "2022-08-11T00:00:00Z",
-              "operatingHours": 3213.9,
-              "mileage": 65432
-            }
-          },
-          "header": {
-            "countingValue": "Time",
-            "countingUnit": "unit:secondUnitOfTime",
-            "countingMethod": "TimeAtLevel",
-            "channels": [
-              {
-                "unit": "unit:degreeCelsius",
-                "numberOfBins": 8,
-                "channelName": "TC_Clutch",
-                "upperLimit": 320.0,
-                "lowerLimit": 0.0
-              }
-            ]
-          },
-          "bammId": "urn:bamm:io.openmanufacturing.digitaltwin:1.0.0#ClassifiedLoadSpectrum"
-        },
-        "adaptionValueList": {
-          "version": "DV_0.0.99",
-          "timestamp": "2022-08-11T00:00:00Z",
-          "mileage_km": 65432.0,
-          "operatingtime_s": 11570040,
-          "values": [0.5, 16554.6, 234.3, 323.0]
-        }
+          "body": { "classes": [
+              {"className": "TC_SU-class", "classList": [14]}], "counts":{
+              "countsName":"Time", "countsList": [34968.93]}
+          }
+      }
       }
     ]
   }
