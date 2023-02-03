@@ -47,6 +47,7 @@ Url of the provider connector (not used in the mock up).
       {
         "componentId": "urn:uuid:b43a1fab-f460-4d24-b078-e58a0247ad1e",
         "classifiedLoadSpectrumGearSet": {
+          "bammId": "urn:bamm:io.openmanufacturing.digitaltwin:1.0.0#ClassifiedLoadSpectrum",
           "targetComponentID": "urn:uuid:1d161134-8bd4-4253-8735-304852d1d17b",
           "metadata": {
               "projectDescription": "projectnumber Stadt",
@@ -93,6 +94,7 @@ Url of the provider connector (not used in the mock up).
           }
       },
         "classifiedLoadSpectrumGearOil": {
+          "bammId": "urn:bamm:io.openmanufacturing.digitaltwin:1.0.0#ClassifiedLoadSpectrum",
           "targetComponentID": "urn:uuid:1d161134-8bd4-4253-8735-304852d1d17b",
           "metadata": {
               "projectDescription": "projectnumber Stadt",
