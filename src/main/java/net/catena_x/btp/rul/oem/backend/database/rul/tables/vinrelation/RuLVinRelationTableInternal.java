@@ -20,6 +20,8 @@ import java.util.function.Supplier;
 
 @Component
 public class RuLVinRelationTableInternal extends RuLTableBase {
+    public static final String NO_DATA_REF = "noData";
+
     @Autowired private RuLVinRelationRepository rulVinRelationRepository;
     @Autowired private VehicleTable vehicleTable;
 
@@ -36,15 +38,19 @@ public class RuLVinRelationTableInternal extends RuLTableBase {
     }
 
     @RuLTransactionDefaultUseExisting
-    public void insertExternalTransaction(@NotNull final String vin,
-                                          @NotNull final String refId) throws OemRuLException {
+    public void insertExternalTransaction(@NotNull final String vin, @NotNull final String refId,
+                                          @NotNull final boolean noData) throws OemRuLException {
         try {
-            final Vehicle existingVehicle = vehicleTable.getByIdNewTransaction(refId);
-            if(!isVehicleRefIdExisting(refId)) {
-                throw new OemRuLException("Vehicle with given ref-id does not exist in rawdata database!");
-            }
+            if(noData) {
+                rulVinRelationRepository.insert(vin, NO_DATA_REF, true);
+            } else {
+                final Vehicle existingVehicle = vehicleTable.getByIdNewTransaction(refId);
+                if (!isVehicleRefIdExisting(refId)) {
+                    throw new OemRuLException("Vehicle with given ref-id does not exist in rawdata database!");
+                }
 
-            rulVinRelationRepository.insert(vin, refId);
+                rulVinRelationRepository.insert(vin, refId, false);
+            }
         } catch (final Exception exception) {
             logger.error(exception.getMessage());
             exception.printStackTrace();
@@ -53,8 +59,9 @@ public class RuLVinRelationTableInternal extends RuLTableBase {
     }
 
     @RuLTransactionDefaultCreateNew
-    public void insertNewTransaction(@NotNull final String vin, @NotNull final String refId) throws OemRuLException {
-        insertExternalTransaction(vin, refId);
+    public void insertNewTransaction(@NotNull final String vin, @NotNull final String refId,
+                                     @NotNull final boolean noData) throws OemRuLException {
+        insertExternalTransaction(vin, refId, noData);
     }
 
     private boolean isVehicleRefIdExisting(@NotNull final String refId) throws OemDatabaseException {
@@ -121,6 +128,22 @@ public class RuLVinRelationTableInternal extends RuLTableBase {
         deleteByRefIdExternalTransaction(refId);
     }
 
+    @RuLTransactionSerializableUseExisting
+    public void deleteByNoDataExternalTransaction(@NotNull final boolean noData) throws OemRuLException {
+        try {
+            rulVinRelationRepository.deleteByNoData(noData);
+        } catch (final Exception exception) {
+            logger.error(exception.getMessage());
+            exception.printStackTrace();
+            throw failed("Deleting VIN relation failed: " + exception.getMessage(), exception);
+        }
+    }
+
+    @RuLTransactionSerializableCreateNew
+    public void deleteByNoDataNewTransaction(@NotNull final boolean noData) throws OemRuLException {
+        deleteByNoDataExternalTransaction(noData);
+    }
+
     private boolean isRefIdExisting(@NotNull final String refId) throws OemRuLException {
         return rulVinRelationRepository.queryByRefId(refId) != null;
     }
@@ -171,5 +194,21 @@ public class RuLVinRelationTableInternal extends RuLTableBase {
     @RuLTransactionDefaultCreateNew
     public RuLVinRelationDAO getByRefIdNewTransaction(@NotNull final String refId) throws OemRuLException {
         return getByRefIdExternalTransaction(refId);
+    }
+
+    @RuLTransactionDefaultUseExisting
+    public RuLVinRelationDAO getByNoDataExternalTransaction(@NotNull final boolean noData) throws OemRuLException {
+        try {
+            return rulVinRelationRepository.queryByNoData(noData);
+        } catch (final Exception exception) {
+            logger.error(exception.getMessage());
+            exception.printStackTrace();
+            throw failed("Querying VIN relation failed! " + exception.getMessage(), exception);
+        }
+    }
+
+    @RuLTransactionDefaultCreateNew
+    public RuLVinRelationDAO getByNoDataNewTransaction(@NotNull final boolean noData) throws OemRuLException {
+        return getByNoDataExternalTransaction(noData);
     }
 }

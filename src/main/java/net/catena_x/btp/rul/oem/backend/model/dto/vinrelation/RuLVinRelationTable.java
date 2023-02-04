@@ -22,12 +22,14 @@ public class RuLVinRelationTable {
         return internal.runSerializableExternalTransaction(function);
     }
 
-    public void insertNewTransaction(@NotNull final String vin, @NotNull final String refId) throws OemRuLException {
-        internal.insertNewTransaction(vin, refId);
+    public void insertNewTransaction(@NotNull final String vin, @NotNull final String refId,
+                                     @NotNull final boolean noData) throws OemRuLException {
+        internal.insertNewTransaction(vin, refId, noData);
     }
 
-    public void insertExternalTransaction(@NotNull final String vin, @NotNull final String refId) throws OemRuLException {
-        internal.insertExternalTransaction(vin, refId);
+    public void insertExternalTransaction(@NotNull final String vin, @NotNull final String refId,
+                                          @NotNull final boolean noData) throws OemRuLException {
+        internal.insertExternalTransaction(vin, refId, noData);
     }
 
     public void deleteAllNewTransaction() throws OemRuLException {
@@ -54,6 +56,14 @@ public class RuLVinRelationTable {
         internal.deleteByRefIdExternalTransaction(refId);
     }
 
+    public void deleteByNoDataNewTransaction(@NotNull final boolean noData) throws OemRuLException {
+        internal.deleteByNoDataNewTransaction(noData);
+    }
+
+    public void deleteByNoDatadExternalTransaction(@NotNull final boolean noData) throws OemRuLException {
+        internal.deleteByNoDataExternalTransaction(noData);
+    }
+
     public List<RuLVinRelation> getAllNewTransaction() throws OemRuLException {
         return rulVinRelationConverter.toDTO(internal.getAllNewTransaction());
     }
@@ -76,5 +86,13 @@ public class RuLVinRelationTable {
 
     public RuLVinRelation getByRefIdExternalTransaction(@NotNull final String refId) throws OemRuLException {
         return rulVinRelationConverter.toDTO(internal.getByRefIdExternalTransaction(refId));
+    }
+
+    public RuLVinRelation getByNoDataNewTransaction(@NotNull final boolean noData) throws OemRuLException {
+        return rulVinRelationConverter.toDTO(internal.getByNoDataNewTransaction(noData));
+    }
+
+    public RuLVinRelation getByNoDataExternalTransaction(@NotNull final boolean noData) throws OemRuLException {
+        return rulVinRelationConverter.toDTO(internal.getByNoDataExternalTransaction(noData));
     }
 }

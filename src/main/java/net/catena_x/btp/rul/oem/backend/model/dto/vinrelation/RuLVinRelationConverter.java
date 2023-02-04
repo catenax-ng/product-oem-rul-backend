@@ -9,10 +9,10 @@ import javax.validation.constraints.NotNull;
 @Component
 public final class RuLVinRelationConverter extends DAOConverter<RuLVinRelationDAO, RuLVinRelation> {
     protected RuLVinRelation toDTOSourceExists(@NotNull final RuLVinRelationDAO source) {
-        return new RuLVinRelation(source.getVin(), source.getRefId());
+        return new RuLVinRelation(source.getVin(), source.getRefId(), source.isNoData());
     }
 
     protected RuLVinRelationDAO toDAOSourceExists(@NotNull final RuLVinRelation source) {
-        return new RuLVinRelationDAO(source.getVin(), source.getRefId());
+        return new RuLVinRelationDAO(source.getVin(), source.getRefId(), source.isNoData());
     }
 }

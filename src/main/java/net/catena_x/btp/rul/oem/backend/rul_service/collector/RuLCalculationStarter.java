@@ -10,6 +10,7 @@ import net.catena_x.btp.libraries.oem.backend.model.dto.vehicle.Vehicle;
 import net.catena_x.btp.libraries.oem.backend.model.dto.vehicle.VehicleTable;
 import net.catena_x.btp.libraries.util.apihelper.ApiHelper;
 import net.catena_x.btp.rul.oem.backend.model.dto.calculation.RuLCalculationTable;
+import net.catena_x.btp.rul.oem.backend.model.dto.vinrelation.RuLVinRelation;
 import net.catena_x.btp.rul.oem.backend.model.enums.RuLCalculationStatus;
 import net.catena_x.btp.rul.oem.backend.rul_service.collector.util.RuLInputDataBuilder;
 import net.catena_x.btp.rul.oem.backend.rul_service.collector.util.RuLSupplierNotificationCreator;
@@ -58,7 +59,12 @@ public class RuLCalculationStarter {
             @NotNull final RuLNotificationFromRequesterContent requesterNotificationContent) {
 
         try {
-            final Vehicle vehicle = getVehicleByVIN(requesterNotificationContent.getVin());
+            final String vin = requesterNotificationContent.getVin();
+            final Vehicle vehicle = getVehicleByVIN(vin);
+            if(vehicle == null) {
+                return failed(RuLStarterCalculationType.NO_DATA_FOR_VEHICLE,
+                        "Vehicle with vin " + vin + " has no data for RuL calculation.");
+            }
 
             final String requestId = generateRequestId();
             final RuLDataToSupplierContent dataToSupplierContent = rulInputDataBuilder.build(requestId, vehicle);
@@ -94,7 +100,7 @@ public class RuLCalculationStarter {
 
     private OemRuLNoDataForVehicleException noDataForVehicle(@NotNull final String vin) {
         return new OemRuLNoDataForVehicleException("Vehicle with vin " + vin
-                                                            + " has no load collectives for RuL calculation.");
+                                                            + " has no data for RuL calculation.");
     }
 
     private ResponseEntity<RuLStarterApiResult> ok(final RuLStarterCalculationType type, final String info) {
@@ -108,7 +114,12 @@ public class RuLCalculationStarter {
 
     private Vehicle getVehicleByVIN(final String vin) throws OemRuLException {
         try {
-            final Vehicle vehicle = vehicleTable.getByIdWithTelematicsDataNewTransaction(getVehicleIdByVIN(vin));
+            final RuLVinRelation relation = getVinRelationIdByVIN(vin);
+            if(relation.isNoData()) {
+                return null;
+            }
+
+            final Vehicle vehicle = vehicleTable.getByIdWithTelematicsDataNewTransaction(relation.getRefId());
             checkVehicleFound(vehicle, vin);
             return vehicle;
         } catch(final OemDatabaseException exception) {
@@ -116,9 +127,9 @@ public class RuLCalculationStarter {
         }
     }
 
-    private String getVehicleIdByVIN(final String vin) throws OemRuLException {
+    private RuLVinRelation getVinRelationIdByVIN(final String vin) throws OemRuLException {
         assertVIN(vin);
-        return rulVinToIdConverter.convert(vin);
+        return rulVinToIdConverter.getByVin(vin);
     }
 
     private void checkVehicleFound(final Vehicle vehicle, final String vin) throws OemRuLException {

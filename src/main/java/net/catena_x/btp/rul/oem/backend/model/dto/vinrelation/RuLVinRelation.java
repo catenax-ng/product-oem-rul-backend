@@ -12,4 +12,5 @@ import lombok.Setter;
 public class RuLVinRelation {
     private String vin;
     private String refId;
+    private boolean noData;
 }

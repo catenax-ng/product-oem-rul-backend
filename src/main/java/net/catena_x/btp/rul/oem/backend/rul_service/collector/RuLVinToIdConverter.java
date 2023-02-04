@@ -13,11 +13,11 @@ import javax.validation.constraints.NotNull;
 public class RuLVinToIdConverter {
     @Autowired RuLVinRelationTable vinRelationTable;
 
-    public String convert(@NotNull final String vin) throws OemRuLException {
+    public RuLVinRelation getByVin(@NotNull final String vin) throws OemRuLException {
         final RuLVinRelation relation = vinRelationTable.getByVinNewTransaction(vin);
         assetRelation(relation, vin);
 
-        return relation.getRefId();
+        return relation;
     }
 
     private void assetRelation(@NotNull final RuLVinRelation relation, @NotNull final String vin)
