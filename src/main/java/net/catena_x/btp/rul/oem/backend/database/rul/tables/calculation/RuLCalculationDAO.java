@@ -11,11 +11,15 @@ import java.time.Instant;
 @Entity
 @Table(name = "rulcalculations")
 @NamedNativeQuery(name = "RuLCalculationDAO.insert",
-        query = "INSERT INTO rulcalculations (id, requester_notification_id, calculation_timestamp, status, rul) "
-                + "VALUES (:id, :requester_notification_id, :calculation_timestamp, :status, :rul)")
+        query = "INSERT INTO rulcalculations (id, requester_notification_id, calculation_timestamp, status, rul, "
+                + "requester_url, requester_bpn, requester_result_asset_id) "
+                + "VALUES (:id, :requester_notification_id, :calculation_timestamp, :status, :rul, "
+                +":requester_url, :requester_bpn, :requester_result_asset_id)")
 @NamedNativeQuery(name = "RuLCalculationDAO.createNow",
-        query = "INSERT INTO rulcalculations (id, requester_notification_id, calculation_timestamp, status, rul) "
-                + "VALUES (:id, :requester_notification_id, CURRENT_TIMESTAMP, :status, :rul)")
+        query = "INSERT INTO rulcalculations (id, requester_notification_id, calculation_timestamp, status, rul, "
+                + "requester_url, requester_bpn, requester_result_asset_id) "
+                + "VALUES (:id, :requester_notification_id, CURRENT_TIMESTAMP, :status, :rul, "
+                +":requester_url, :requester_bpn, :requester_result_asset_id)")
 @NamedNativeQuery(name = "RuLCalculationDAO.updateStatus",
         query = "UPDATE rulcalculations SET status=:status WHERE id=:id")
 @NamedNativeQuery(name = "RuLCalculationDAO.updateStatusAndRuL",
@@ -64,4 +68,13 @@ public class RuLCalculationDAO {
 
     @Column(name="rul", length=10000, updatable=true, nullable=true)
     private String rul;
+
+    @Column(name="requester_url", length=2000, updatable=false, nullable=false)
+    private String requesterUrl;
+
+    @Column(name="requester_bpn", length=40, updatable=false, nullable=false)
+    private String requesterBpn;
+
+    @Column(name="requester_result_asset_id", length=200, updatable=false, nullable=false)
+    private String requesterResultAssetId;
 }

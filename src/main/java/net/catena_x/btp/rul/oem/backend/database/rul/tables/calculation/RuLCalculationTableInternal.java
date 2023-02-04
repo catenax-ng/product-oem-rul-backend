@@ -1,5 +1,6 @@
 package net.catena_x.btp.rul.oem.backend.database.rul.tables.calculation;
 
+import net.catena_x.btp.libraries.edc.model.EdcAssetAddress;
 import net.catena_x.btp.rul.oem.backend.database.rul.annotations.RuLTransactionDefaultCreateNew;
 import net.catena_x.btp.rul.oem.backend.database.rul.annotations.RuLTransactionDefaultUseExisting;
 import net.catena_x.btp.rul.oem.backend.database.rul.annotations.RuLTransactionSerializableCreateNew;
@@ -51,9 +52,11 @@ public class RuLCalculationTableInternal extends RuLTableBase {
                                           @NotNull final String requesterNotificationId,
                                           @NotNull final Instant calculationTimestamp,
                                           @NotNull final RuLCalculationStatus status,
-                                          @Nullable final String rul) throws OemRuLException {
+                                          @Nullable final String rul,
+                                          @NotNull final EdcAssetAddress assetAddress) throws OemRuLException {
         try {
-            rulCalculationRepository.insert(id, requesterNotificationId, calculationTimestamp, status.toString(), rul);
+            rulCalculationRepository.insert(id, requesterNotificationId, calculationTimestamp, status.toString(),
+                    rul, assetAddress.getConnectorUrl(), assetAddress.getBpn(), assetAddress.getAssetId());
         } catch (final Exception exception) {
             logger.error(exception.getMessage());
             exception.printStackTrace();
@@ -66,18 +69,21 @@ public class RuLCalculationTableInternal extends RuLTableBase {
                                      @NotNull final String requesterNotificationId,
                                      @NotNull final Instant calculationTimestamp,
                                      @NotNull final RuLCalculationStatus status,
-                                     @Nullable final String rul) throws OemRuLException {
-        insertExternalTransaction(id, requesterNotificationId, calculationTimestamp, status, rul);
+                                     @Nullable final String rul,
+                                     @NotNull final EdcAssetAddress assetAddress) throws OemRuLException {
+        insertExternalTransaction(id, requesterNotificationId, calculationTimestamp, status, rul, assetAddress);
     }
 
     @RuLTransactionSerializableUseExisting
     public String insertGetIdExternalTransaction(@NotNull final String requesterNotificationId,
                                                  @NotNull final Instant calculationTimestamp,
                                                  @NotNull final RuLCalculationStatus status,
-                                                 @Nullable final String rul) throws OemRuLException {
+                                                 @Nullable final String rul,
+                                                 @NotNull final EdcAssetAddress assetAddress) throws OemRuLException {
         try {
             final String id = generateNewId();
-            rulCalculationRepository.insert(id, requesterNotificationId, calculationTimestamp, status.toString(), rul);
+            rulCalculationRepository.insert(id, requesterNotificationId, calculationTimestamp, status.toString(),
+                    rul, assetAddress.getConnectorUrl(), assetAddress.getBpn(), assetAddress.getAssetId());
             return id;
         } catch (final Exception exception) {
             logger.error(exception.getMessage());
@@ -90,16 +96,20 @@ public class RuLCalculationTableInternal extends RuLTableBase {
     public String insertGetIdNewTransaction(@NotNull final String requesterNotificationId,
                                             @NotNull final Instant calculationTimestamp,
                                             @NotNull final RuLCalculationStatus status,
-                                            @Nullable final String rul) throws OemRuLException {
-        return insertGetIdExternalTransaction(requesterNotificationId, calculationTimestamp, status, rul);
+                                            @Nullable final String rul,
+                                            @NotNull final EdcAssetAddress assetAddress) throws OemRuLException {
+        return insertGetIdExternalTransaction(requesterNotificationId, calculationTimestamp, status,
+                                              rul, assetAddress);
     }
 
     @RuLTransactionSerializableUseExisting
     public void createNowExternalTransaction(@NotNull final String id,
-                                             @NotNull final String requesterNotificationId) throws OemRuLException {
+                                             @NotNull final String requesterNotificationId,
+                                             @NotNull final EdcAssetAddress assetAddress) throws OemRuLException {
         try {
             rulCalculationRepository.createNow(
-                    id, requesterNotificationId, RuLCalculationStatus.CREATED.toString(), null);
+                    id, requesterNotificationId, RuLCalculationStatus.CREATED.toString(), null,
+                    assetAddress.getConnectorUrl(), assetAddress.getBpn(), assetAddress.getAssetId());
         } catch (final Exception exception) {
             logger.error(exception.getMessage());
             exception.printStackTrace();
@@ -109,17 +119,20 @@ public class RuLCalculationTableInternal extends RuLTableBase {
 
     @RuLTransactionSerializableCreateNew
     public void createNowNewTransaction(@NotNull final String id,
-                                        @NotNull final String requesterNotificationId) throws OemRuLException {
-        createNowExternalTransaction(id, requesterNotificationId);
+                                        @NotNull final String requesterNotificationId,
+                                        @NotNull final EdcAssetAddress assetAddress) throws OemRuLException {
+        createNowExternalTransaction(id, requesterNotificationId, assetAddress);
     }
 
     @RuLTransactionSerializableUseExisting
-    public String createNowGetIdExternalTransaction(@NotNull final String requesterNotificationId)
+    public String createNowGetIdExternalTransaction(@NotNull final String requesterNotificationId,
+                                                    @NotNull final EdcAssetAddress assetAddress)
             throws OemRuLException {
         try {
             final String id = generateNewId();
             rulCalculationRepository.createNow(
-                    id, requesterNotificationId, RuLCalculationStatus.CREATED.toString(), null);
+                    id, requesterNotificationId, RuLCalculationStatus.CREATED.toString(), null,
+                    assetAddress.getConnectorUrl(), assetAddress.getBpn(), assetAddress.getAssetId());
             return id;
         } catch (final Exception exception) {
             logger.error(exception.getMessage());
@@ -129,9 +142,10 @@ public class RuLCalculationTableInternal extends RuLTableBase {
     }
 
     @RuLTransactionSerializableCreateNew
-    public String createNowGetIdNewTransaction(@NotNull final String requesterNotificationId)
+    public String createNowGetIdNewTransaction(@NotNull final String requesterNotificationId,
+                                               @NotNull final EdcAssetAddress assetAddress)
             throws OemRuLException {
-        return createNowGetIdExternalTransaction(requesterNotificationId);
+        return createNowGetIdExternalTransaction(requesterNotificationId, assetAddress);
     }
 
     @RuLTransactionSerializableUseExisting

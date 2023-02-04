@@ -13,12 +13,18 @@ public interface RuLCalculationRepository extends Repository<RuLCalculationDAO, 
     @Modifying void createNow(@Param("id") @NotNull final String id,
                               @Param("requester_notification_id") @NotNull final String requesterNotificationId,
                               @Param("status") @NotNull final String status,
-                              @Param("rul") @Nullable final String rul);
+                              @Param("rul") @Nullable final String rul,
+                              @Param("requester_url") @NotNull final String requesterUrl,
+                              @Param("requester_bpn") @NotNull final String requesterBpn,
+                              @Param("requester_result_asset_id") @NotNull final String requesterResultAssetId);
     @Modifying void insert(@Param("id") @NotNull final String id,
                            @Param("requester_notification_id") @NotNull final String requesterNotificationId,
                            @Param("calculation_timestamp") @NotNull final Instant calculationTimestamp,
                            @Param("status") @NotNull final String status,
-                           @Param("rul") @Nullable final String rul);
+                           @Param("rul") @Nullable final String rul,
+                           @Param("requester_url") @NotNull final String requesterUrl,
+                           @Param("requester_bpn") @NotNull final String requesterBpn,
+                           @Param("requester_result_asset_id") @NotNull final String requesterResultAssetId);
     @Modifying void updateStatus(@Param("id") @NotNull final String id, @Param("status") @NotNull final String status);
     @Modifying void updateStatusAndRuL(@Param("id") @NotNull final String id,
                                        @Param("status") @NotNull final String status,

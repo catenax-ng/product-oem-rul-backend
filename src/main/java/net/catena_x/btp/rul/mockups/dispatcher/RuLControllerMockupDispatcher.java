@@ -11,7 +11,6 @@ import net.catena_x.btp.rul.mockups.requester.RuLRequesterMock;
 import net.catena_x.btp.rul.mockups.supplier.RuLSupplierMock;
 import net.catena_x.btp.rul.oem.backend.rul_service.notifications.dao.requester.RuLNotificationToRequesterContentDAO;
 import net.catena_x.btp.rul.oem.backend.rul_service.notifications.dao.supplierservice.RuLNotificationToSupplierContentDAO;
-import net.catena_x.btp.rul.oem.util.exceptions.OemRuLException;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,7 +27,6 @@ public class RuLControllerMockupDispatcher {
     @Autowired private RuLSupplierMock rulSupplierMock;
     @Autowired private RuLRequesterMock rulRequesterMock;
 
-    @Value("${requester.rulresult.resultAssetName}") private String resultAssetName;
     @Value("${supplier.rulservice.inputAssetName}") private String inputAssetName;
 
     @io.swagger.v3.oas.annotations.Operation(
@@ -104,14 +102,11 @@ public class RuLControllerMockupDispatcher {
             @PathVariable @NotNull final String assetId,
             @RequestParam(required = true, name="provider-connector-url") @Nullable String providerConnectorUrl) {
         try {
-            if(assetId.equals(resultAssetName)) {
-                return rulRequesterMock.receiveRuLResultFromOemMock(getNotificationToRequester(data));
-            }
-            else if(assetId.equals(inputAssetName)) {
+            if(assetId.equals(inputAssetName)) {
                 return rulSupplierMock.runRuLCalculationMock(getNotificationToSupplier(data));
             }
             else {
-                throw new OemRuLException("Unknown asset id " + assetId + "!");
+                return rulRequesterMock.receiveRuLResultFromOemMock(getNotificationToRequester(data));
             }
         } catch (final Exception exception) {
             return apiHelper.failed("Asset id " + assetId + " could not be dispatched: " + exception.getMessage());

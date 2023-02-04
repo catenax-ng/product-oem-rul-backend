@@ -5,7 +5,6 @@ import net.catena_x.btp.libraries.notification.dto.items.NotificationHeader;
 import net.catena_x.btp.libraries.notification.enums.NFSeverity;
 import net.catena_x.btp.libraries.notification.enums.NFStatus;
 import net.catena_x.btp.rul.oem.backend.rul_service.notifications.dto.supplierservice.RuLDataToSupplierContent;
-import net.catena_x.btp.rul.oem.backend.rul_service.notifications.enums.NotificationClassification;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -16,11 +15,11 @@ import java.time.Instant;
 
 @Component
 public class RuLSupplierNotificationCreator {
-    @Value("${supplier.rulservice.endpoint}") private URL supplierRuLServiceEndpoint;
-    @Value("${supplier.bpn}") private String supplierBpn;
     @Value("${edc.bpn}") private String edcBpn;
     @Value("${edc.endpoint}") private URL edcEndpoint;
-    @Value("${supplier.rulservice.respondAssetId}") private String respondAssetId;
+    @Value("${supplier.rulservice.endpoint}") private URL supplierRuLServiceEndpoint;
+    @Value("${supplier.rulservice.bpn}") private String supplierBpn;
+    @Value("${supplier.rulservice.inputAssetName}") private String supplierAssetId;
     @Value("${supplier.rulservice.classification:RemainingUsefulLifePredictor}") private String rulServiceClassification;
 
     public Notification<RuLDataToSupplierContent> createForHttp(
@@ -35,7 +34,6 @@ public class RuLSupplierNotificationCreator {
 
     private NotificationHeader createHeader(@NotNull final String requestId) {
         final NotificationHeader header = new NotificationHeader();
-
         header.setNotificationID(requestId);
 
         setSenderData(header);
@@ -48,7 +46,7 @@ public class RuLSupplierNotificationCreator {
     private void setSenderData(@NotNull final NotificationHeader headerInOut) {
         headerInOut.setSenderBPN(edcBpn);
         headerInOut.setSenderAddress(edcEndpoint.toString());
-        headerInOut.setRespondAssetId(respondAssetId);
+        headerInOut.setRespondAssetId(supplierAssetId);
     }
 
     private void setRecipientData(@NotNull final NotificationHeader headerInOut) {

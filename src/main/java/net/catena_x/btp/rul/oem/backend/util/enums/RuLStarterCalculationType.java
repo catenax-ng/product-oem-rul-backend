@@ -21,6 +21,9 @@ public enum RuLStarterCalculationType {
     @JsonProperty("RequiredLoadSpectrumTypeNotFound")
     REQUIRED_LOAD_SPECTRUM_TYPE_NOT_FOUND,
 
+    @JsonProperty("RequestError")
+    REQUEST_ERROR,
+
     @JsonProperty("InternalError")
     INTERNAL_ERROR
 }

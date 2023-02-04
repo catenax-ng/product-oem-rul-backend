@@ -2,6 +2,7 @@ package net.catena_x.btp.rul.oem.backend.rul_service.collector;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import net.catena_x.btp.libraries.edc.EdcApi;
+import net.catena_x.btp.libraries.edc.model.EdcAssetAddress;
 import net.catena_x.btp.libraries.edc.util.exceptions.EdcException;
 import net.catena_x.btp.libraries.notification.dto.Notification;
 import net.catena_x.btp.libraries.oem.backend.database.util.exceptions.OemDatabaseException;
@@ -53,7 +54,7 @@ public class RuLCalculationStarter {
     private final Logger logger = LoggerFactory.getLogger(RuLCalculationStarter.class);
 
     public ResponseEntity<RuLStarterApiResult> startCalculation(
-            @NotNull final String requesterNotificationId,
+            @NotNull final String requesterNotificationId, @NotNull final EdcAssetAddress requesterAssetAddress,
             @NotNull final RuLNotificationFromRequesterContent requesterNotificationContent) {
 
         try {
@@ -66,7 +67,7 @@ public class RuLCalculationStarter {
                 throw noDataForVehicle(requesterNotificationContent.getVin());
             }
 
-            createNewCalculationInDatabase(requestId, requesterNotificationId);
+            createNewCalculationInDatabase(requestId, requesterNotificationId, requesterAssetAddress);
             dispatchRequestWithHttp(requestId, dataToSupplierContent);
         } catch(final OemRuLLoadSpectrumNotFoundException exception) {
             return failed(RuLStarterCalculationType.REQUIRED_LOAD_SPECTRUM_TYPE_NOT_FOUND, exception.getMessage());
@@ -133,10 +134,10 @@ public class RuLCalculationStarter {
     }
 
     private void createNewCalculationInDatabase(
-            @NotNull final String requestId, @NotNull final String requesterNotificationId) throws OemRuLException {
-        rulCalculationTable.createNowNewTransaction(requestId, requesterNotificationId);
+            @NotNull final String requestId, @NotNull final String requesterNotificationId,
+            @NotNull final EdcAssetAddress requesterAssetAddress) throws OemRuLException {
+        rulCalculationTable.createNowNewTransaction(requestId, requesterNotificationId, requesterAssetAddress);
     }
-
 
     private void dispatchRequestWithHttp(@NotNull final String requestId,
                                          @NotNull final RuLDataToSupplierContent rulDataToSupplierContent)

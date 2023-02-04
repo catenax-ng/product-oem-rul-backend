@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import net.catena_x.btp.libraries.bamm.custom.remainingusefullife.RemainingUsefulLife;
+import net.catena_x.btp.libraries.edc.model.EdcAssetAddress;
 import net.catena_x.btp.rul.oem.backend.model.enums.RuLCalculationStatus;
 
 import java.time.Instant;
@@ -19,4 +20,5 @@ public class RuLCalculation {
     private Instant calculationTimestamp;
     private RuLCalculationStatus status;
     private RemainingUsefulLife rul;
+    private EdcAssetAddress requesterResultAddress;
 }

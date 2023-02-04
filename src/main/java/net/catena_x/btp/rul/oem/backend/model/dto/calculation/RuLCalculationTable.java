@@ -1,6 +1,7 @@
 package net.catena_x.btp.rul.oem.backend.model.dto.calculation;
 
 import net.catena_x.btp.libraries.bamm.custom.remainingusefullife.RemainingUsefulLife;
+import net.catena_x.btp.libraries.edc.model.EdcAssetAddress;
 import net.catena_x.btp.rul.oem.backend.database.rul.tables.calculation.RuLCalculationTableInternal;
 import net.catena_x.btp.rul.oem.backend.model.dto.util.RuLRemainingUsefulLifeConverter;
 import net.catena_x.btp.rul.oem.backend.model.enums.RuLCalculationStatus;
@@ -39,52 +40,60 @@ public class RuLCalculationTable {
     public void insertNewTransaction(@NotNull final String id, @NotNull final String requesterNotificationId,
                                      @NotNull final Instant calculationTimestamp,
                                      @NotNull final RuLCalculationStatus status,
-                                     @Nullable final RemainingUsefulLife rul) throws OemRuLException {
-        internal.insertNewTransaction(
-                id, requesterNotificationId, calculationTimestamp, status, rulRemainingUsefulLifeConverter.toDAO(rul) );
+                                     @Nullable final RemainingUsefulLife rul,
+                                     @NotNull final EdcAssetAddress assetAddress) throws OemRuLException {
+        internal.insertNewTransaction(id, requesterNotificationId, calculationTimestamp, status,
+                rulRemainingUsefulLifeConverter.toDAO(rul), assetAddress);
     }
 
     public void insertExternalTransaction(@NotNull final String id, @NotNull final String requesterNotificationId,
                                           @NotNull final Instant calculationTimestamp,
                                           @NotNull final RuLCalculationStatus status,
-                                          @Nullable final RemainingUsefulLife rul) throws OemRuLException {
-        internal.insertExternalTransaction(
-                id, requesterNotificationId, calculationTimestamp, status, rulRemainingUsefulLifeConverter.toDAO(rul) );
+                                          @Nullable final RemainingUsefulLife rul,
+                                          @NotNull final EdcAssetAddress assetAddress) throws OemRuLException {
+        internal.insertExternalTransaction(id, requesterNotificationId, calculationTimestamp, status,
+                rulRemainingUsefulLifeConverter.toDAO(rul), assetAddress);
     }
 
     public String insertGetIdNewTransaction(@NotNull final String requesterNotificationId,
                                             @NotNull final Instant calculationTimestamp,
                                             @NotNull final RuLCalculationStatus status,
-                                            @Nullable final RemainingUsefulLife rul) throws OemRuLException {
-        return internal.insertGetIdNewTransaction(
-                requesterNotificationId, calculationTimestamp, status, rulRemainingUsefulLifeConverter.toDAO(rul));
+                                            @Nullable final RemainingUsefulLife rul,
+                                            @NotNull final EdcAssetAddress assetAddress) throws OemRuLException {
+        return internal.insertGetIdNewTransaction(requesterNotificationId, calculationTimestamp, status,
+                rulRemainingUsefulLifeConverter.toDAO(rul), assetAddress);
     }
 
     public String insertGetIdExternalTransaction(@NotNull final String requesterNotificationId,
                                                  @NotNull final Instant calculationTimestamp,
                                                  @NotNull final RuLCalculationStatus status,
-                                                 @Nullable final RemainingUsefulLife rul) throws OemRuLException {
-        return internal.insertGetIdExternalTransaction(
-                requesterNotificationId, calculationTimestamp, status, rulRemainingUsefulLifeConverter.toDAO(rul));
+                                                 @Nullable final RemainingUsefulLife rul,
+                                                 @NotNull final EdcAssetAddress assetAddress) throws OemRuLException {
+        return internal.insertGetIdExternalTransaction(requesterNotificationId, calculationTimestamp, status,
+                rulRemainingUsefulLifeConverter.toDAO(rul), assetAddress);
     }
 
-    public void createNowNewTransaction(@NotNull final String id, @NotNull final String requesterNotificationId)
+    public void createNowNewTransaction(@NotNull final String id, @NotNull final String requesterNotificationId,
+                                        @NotNull final EdcAssetAddress assetAddress)
             throws OemRuLException {
-        internal.createNowNewTransaction(id, requesterNotificationId);
+        internal.createNowNewTransaction(id, requesterNotificationId, assetAddress);
     }
 
-    public void createNowExternalTransaction(@NotNull final String id, @NotNull final String requesterNotificationId)
+    public void createNowExternalTransaction(@NotNull final String id, @NotNull final String requesterNotificationId,
+                                             @NotNull final EdcAssetAddress assetAddress)
             throws OemRuLException {
-        internal.createNowExternalTransaction(id, requesterNotificationId);
+        internal.createNowExternalTransaction(id, requesterNotificationId, assetAddress);
     }
 
-    public String createNowGetIdNewTransaction(@NotNull final String requesterNotificationId) throws OemRuLException {
-        return internal.createNowGetIdNewTransaction(requesterNotificationId);
+    public String createNowGetIdNewTransaction(@NotNull final String requesterNotificationId,
+                                               @NotNull final EdcAssetAddress assetAddress) throws OemRuLException {
+        return internal.createNowGetIdNewTransaction(requesterNotificationId, assetAddress);
     }
 
-    public String createNowGetIdExternalTransaction(@NotNull final String requesterNotificationId)
+    public String createNowGetIdExternalTransaction(@NotNull final String requesterNotificationId,
+                                                    @NotNull final EdcAssetAddress assetAddress)
             throws OemRuLException {
-        return internal.createNowGetIdExternalTransaction(requesterNotificationId);
+        return internal.createNowGetIdExternalTransaction(requesterNotificationId, assetAddress);
     }
 
     public void updateStatusNewTransaction(@NotNull final String id, @NotNull final RuLCalculationStatus newStatus)

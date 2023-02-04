@@ -4,7 +4,7 @@ public final class ReceiverNotifyResultDoc {
     public static final String SUMMARY = "Receives calculation results and forwards it to requester.";
     public static final String DESCRIPTION = """
 The calculation results are calculated by an external service. This service is called by the notifycalculation endpoint.
-There it one result per calculation. The result is mapped to the related calculation and forwarded to the requester. 
+There it one result per calculation. The result is mapped to the related calculation and forwarded to the  requester. 
 """;
     public static final String BODY_DESCRIPTION = "Notification with result.";
 
@@ -33,7 +33,7 @@ There it one result per calculation. The result is mapped to the related calcula
           "remainingOperatingHours": 4566,
           "remainingRunningDistance": 1234,
           "determinationLoaddataSource": {
-            "informationOriginLoadSpectrum": "testdatacalculated"
+            "informationOriginLoadSpectrum": "loggedOEM"
           },
           "determinationStatus": {
             "date": "2022-12-20T12:21:55.523230300Z",

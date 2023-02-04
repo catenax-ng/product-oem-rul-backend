@@ -1,8 +1,10 @@
 package net.catena_x.btp.rul.oem.backend.rul_service.receiver;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.catena_x.btp.libraries.bamm.custom.remainingusefullife.RemainingUsefulLife;
 import net.catena_x.btp.libraries.edc.EdcApi;
+import net.catena_x.btp.libraries.edc.model.EdcAssetAddress;
 import net.catena_x.btp.libraries.edc.util.exceptions.EdcException;
 import net.catena_x.btp.libraries.notification.dto.Notification;
 import net.catena_x.btp.libraries.util.apihelper.ApiHelper;
@@ -22,7 +24,6 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -30,7 +31,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import javax.validation.constraints.NotNull;
-import java.net.URL;
 import java.util.Collections;
 import java.util.function.Supplier;
 
@@ -41,9 +41,6 @@ public class RuLResultForwarder {
     @Autowired private RuLNotificationToRequesterConverter rulNotificationToRequesterConverter;
     @Autowired private RuLRequesterNotificationCreator rulRequesterNotificationCreator;
     @Autowired private EdcApi edcApi;
-
-    @Value("${requester.rulresult.resultAssetName}") private String resultAssetName;
-    @Value("${requester.rulresult.endpoint}") private URL requesterRuLResultEndpoint;
 
     private final Logger logger = LoggerFactory.getLogger(RuLResultForwarder.class);
 
@@ -57,7 +54,16 @@ public class RuLResultForwarder {
 
             final RemainingUsefulLife remainingUsefulLife = result.getRemainingUsefulLife();
             updateCalculationStatusToCalculated(supplierNotificationID, remainingUsefulLife);
-            forwardResultWithHttp(supplierNotificationID, remainingUsefulLife);
+
+            final RuLCalculation calculation = rulCalculationTable.getByIdNewTransaction(
+                    supplierNotificatonContent.getRequestRefId());
+
+            if(calculation == null) {
+                return apiHelper.failed("Failed to process RuL calculation result, unknown calculation id "
+                        + supplierNotificatonContent.getRequestRefId() + "!");
+            }
+
+            forwardResultWithHttp(supplierNotificationID, calculation.getRequesterResultAddress(), remainingUsefulLife);
 
             return apiHelper.ok("Forwarded RuL calculation result with id "
                     + supplierNotificatonContent.getRequestRefId() + " successfully.");
@@ -98,23 +104,25 @@ public class RuLResultForwarder {
         }
     }
 
-    private void forwardResultWithHttp(@NotNull final String calculationId, @NotNull final RemainingUsefulLife result)
-            throws OemRuLException {
+    private void forwardResultWithHttp(@NotNull final String calculationId,
+                                       @NotNull @NotNull final EdcAssetAddress requesterAssetAddress,
+                                       @NotNull final RemainingUsefulLife result) throws OemRuLException {
 
         final Notification<RuLDataToRequesterContent> notification =
-                prepareNotification(calculationId, new RuLDataToRequesterContent(result));
+                prepareNotification(calculationId, requesterAssetAddress, new RuLDataToRequesterContent(result));
 
         logger.info("Forwarding for id " + calculationId + " prepared.");
 
-        checkForwardResult(calculationId, forwardToRequester(calculationId, notification));
+        checkForwardResult(calculationId, forwardToRequester(calculationId, requesterAssetAddress, notification));
     }
 
     private Notification<RuLDataToRequesterContent> prepareNotification(
-            @NotNull final String requestId, @NotNull final RuLDataToRequesterContent rulDataToRequesterContent)
-            throws OemRuLException {
+            @NotNull final String requestId, @NotNull @NotNull final EdcAssetAddress requesterAssetAddress,
+            @NotNull final RuLDataToRequesterContent rulDataToRequesterContent) throws OemRuLException {
 
         try {
-            return rulRequesterNotificationCreator.createForHttp(requestId, rulDataToRequesterContent);
+            return rulRequesterNotificationCreator.createForHttp(requestId, rulDataToRequesterContent,
+                                                                 requesterAssetAddress);
         } catch (final Exception exception) {
             try {
                 updateCalculationStatusToFaildBuildRequest(requestId);
@@ -158,16 +166,24 @@ public class RuLResultForwarder {
     }
 
     private ResponseEntity<JsonNode> forwardToRequester(
-            @NotNull final String requestId, @NotNull final Notification<RuLDataToRequesterContent> notification)
-            throws OemRuLException {
-        return startAsyncRequest(requestId, requesterRuLResultEndpoint.toString(), resultAssetName,
+            @NotNull final String requestId, @NotNull final EdcAssetAddress requesterAssetAddress,
+            @NotNull final Notification<RuLDataToRequesterContent> notification) throws OemRuLException {
+        return startAsyncRequest(requestId, requesterAssetAddress.getConnectorUrl(), requesterAssetAddress.getAssetId(),
                 rulNotificationToRequesterConverter.toDAO(notification), JsonNode.class);
     }
 
+    @Autowired
+    ObjectMapper objectMapper;
     public <BodyType, ResponseType> ResponseEntity<ResponseType> startAsyncRequest(
             @NotNull final String requestId, @NotNull final String endpoint, @NotNull final String asset,
             @NotNull final BodyType messageBody, @NotNull Class<ResponseType> responseTypeClass)
             throws OemRuLException {
+
+        String test = "";
+        try{
+            test = objectMapper.writeValueAsString(messageBody);
+        } catch (Exception e) {}
+
 
         try {
             return edcApi.post(HttpUrl.parse(endpoint), asset, responseTypeClass,
