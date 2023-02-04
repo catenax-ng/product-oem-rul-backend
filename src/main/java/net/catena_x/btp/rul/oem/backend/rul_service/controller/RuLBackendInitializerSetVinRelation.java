@@ -38,6 +38,11 @@ public class RuLBackendInitializerSetVinRelation {
                                             name = InitializerSetVinRelationDoc.VIN_EXAMPLE_2_NAME,
                                             description = InitializerSetVinRelationDoc.VIN_EXAMPLE_2_DESCRIPTION,
                                             value = InitializerSetVinRelationDoc.VIN_EXAMPLE_2_VALUE
+                                    ),
+                                    @io.swagger.v3.oas.annotations.media.ExampleObject(
+                                            name = InitializerSetVinRelationDoc.VIN_EXAMPLE_3_NAME,
+                                            description = InitializerSetVinRelationDoc.VIN_EXAMPLE_3_DESCRIPTION,
+                                            value = InitializerSetVinRelationDoc.VIN_EXAMPLE_3_VALUE
                                     )
                             }
                     ),
@@ -54,6 +59,11 @@ public class RuLBackendInitializerSetVinRelation {
                                             name = InitializerSetVinRelationDoc.REFID_EXAMPLE_2_NAME,
                                             description = InitializerSetVinRelationDoc.REFID_EXAMPLE_2_DESCRIPTION,
                                             value = InitializerSetVinRelationDoc.REFID_EXAMPLE_2_VALUE
+                                    ),
+                                    @io.swagger.v3.oas.annotations.media.ExampleObject(
+                                            name = InitializerSetVinRelationDoc.REFID_EXAMPLE_3_NAME,
+                                            description = InitializerSetVinRelationDoc.REFID_EXAMPLE_3_DESCRIPTION,
+                                            value = InitializerSetVinRelationDoc.REFID_EXAMPLE_3_VALUE
                                     )
                             }
                     )
