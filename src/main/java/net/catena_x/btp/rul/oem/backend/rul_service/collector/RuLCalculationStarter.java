@@ -53,7 +53,7 @@ public class RuLCalculationStarter {
     @Autowired private RuLServiceOptionHelper rulServiceOptionHelper;
     @Autowired private ObjectMapper objectMapper;
 
-    @Value("${supplier.rulservice.inputAssetName}") private String inputAssetName;
+    @Value("${supplier.rulservice.inputAssetId}") private String inputAssetId;
     @Value("${supplier.rulservice.endpoint}") private URL supplierRuLServiceEndpoint;
 
     private final Logger logger = LoggerFactory.getLogger(RuLCalculationStarter.class);
@@ -212,7 +212,7 @@ public class RuLCalculationStarter {
             logger.error("Input to supplier can not be mocked: " + exception.getMessage());
         }
 
-        return startAsyncRequest(requestId, supplierRuLServiceEndpoint.toString(), inputAssetName,
+        return startAsyncRequest(requestId, supplierRuLServiceEndpoint.toString(), inputAssetId,
                 rulNotificationToSupplierConverter.toDAO(notification), JsonNode.class);
     }
 

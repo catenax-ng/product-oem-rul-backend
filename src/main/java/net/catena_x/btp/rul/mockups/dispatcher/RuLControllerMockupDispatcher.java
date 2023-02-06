@@ -27,7 +27,7 @@ public class RuLControllerMockupDispatcher {
     @Autowired private RuLSupplierMock rulSupplierMock;
     @Autowired private RuLRequesterMock rulRequesterMock;
 
-    @Value("${supplier.rulservice.inputAssetName}") private String inputAssetName;
+    @Value("${supplier.rulservice.inputAssetId}") private String inputAssetId;
 
     @io.swagger.v3.oas.annotations.Operation(
             summary = MockupDispatcherDoc.SUMMARY, description = MockupDispatcherDoc.DESCRIPTION,
@@ -102,7 +102,7 @@ public class RuLControllerMockupDispatcher {
             @PathVariable @NotNull final String assetId,
             @RequestParam(required = true, name="provider-connector-url") @Nullable String providerConnectorUrl) {
         try {
-            if(assetId.equals(inputAssetName)) {
+            if(assetId.equals(inputAssetId)) {
                 return rulSupplierMock.runRuLCalculationMock(getNotificationToSupplier(data));
             }
             else {

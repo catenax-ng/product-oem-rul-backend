@@ -19,7 +19,7 @@ public class RuLSupplierNotificationCreator {
     @Value("${edc.endpoint}") private URL edcEndpoint;
     @Value("${supplier.rulservice.endpoint}") private URL supplierRuLServiceEndpoint;
     @Value("${supplier.rulservice.bpn}") private String supplierBpn;
-    @Value("${supplier.rulservice.inputAssetName}") private String supplierAssetId;
+    @Value("${supplier.rulservice.respondAssetId}") private String respondAssetId;
     @Value("${supplier.rulservice.classification:RemainingUsefulLifePredictor}") private String rulServiceClassification;
 
     public Notification<RuLDataToSupplierContent> createForHttp(
@@ -46,7 +46,7 @@ public class RuLSupplierNotificationCreator {
     private void setSenderData(@NotNull final NotificationHeader headerInOut) {
         headerInOut.setSenderBPN(edcBpn);
         headerInOut.setSenderAddress(edcEndpoint.toString());
-        headerInOut.setRespondAssetId(supplierAssetId);
+        headerInOut.setRespondAssetId(respondAssetId);
     }
 
     private void setRecipientData(@NotNull final NotificationHeader headerInOut) {
