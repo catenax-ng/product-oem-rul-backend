@@ -23,11 +23,11 @@ public class RuLSupplierNotificationCreator {
     @Value("${supplier.rulservice.classification:RemainingUsefulLifePredictor}") private String rulServiceClassification;
 
     public Notification<RuLDataToSupplierContent> createForHttp(
-            @NotNull final String requestId,
+            @NotNull final String supplierNotificationId,
             @NotNull final RuLDataToSupplierContent RuLDataToSupplierContent) {
 
         final Notification<RuLDataToSupplierContent> notification = new Notification<>();
-        notification.setHeader(createHeader(requestId));
+        notification.setHeader(createHeader(supplierNotificationId));
         notification.setContent(RuLDataToSupplierContent);
         return notification;
     }

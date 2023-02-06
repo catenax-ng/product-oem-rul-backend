@@ -15,7 +15,7 @@ import java.util.List;
 
 @Component
 public class RuLInputDataBuilder {
-    public RuLDataToSupplierContent build(@NotNull final String requestId,
+    public RuLDataToSupplierContent build(@NotNull final String supplierNotificationId,
                                           @NotNull final Vehicle vehicle) throws OemRuLException {
         final RuLInput rulInput = getRulInput(vehicle);
         if(rulInput == null) {
@@ -25,7 +25,7 @@ public class RuLInputDataBuilder {
         final List<RuLInput> rulInputs = new ArrayList<>();
         rulInputs.add(rulInput);
 
-        return new RuLDataToSupplierContent(requestId, rulInputs);
+        return new RuLDataToSupplierContent(supplierNotificationId, rulInputs);
     }
 
     private RuLInput getRulInput(@NotNull final Vehicle vehicle) throws OemRuLException {

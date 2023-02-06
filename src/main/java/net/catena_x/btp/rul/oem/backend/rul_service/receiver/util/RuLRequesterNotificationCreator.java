@@ -17,23 +17,23 @@ import java.time.Instant;
 public class RuLRequesterNotificationCreator {
     @Value("${edc.bpn}") private String edcBpn;
     @Value("${edc.endpoint}") private String edcEndpoint;
-    @Value("${requester.rulservice.classification:RemainingUsefulLifeResult}") private String rulResultClassification;
+    @Value("${requester.rulservice.classification}") private String rulResultClassification;
 
     public Notification<RuLDataToRequesterContent> createForHttp(
-            @NotNull final String requestId,
+            @NotNull final String requesterNotificationId,
             @NotNull final RuLDataToRequesterContent rulDataToRequesterContent,
             @NotNull final EdcAssetAddress requesterAssetAddress) {
 
         final Notification<RuLDataToRequesterContent> notification = new Notification<>();
-        notification.setHeader(createHeader(requestId, requesterAssetAddress));
+        notification.setHeader(createHeader(requesterNotificationId, requesterAssetAddress));
         notification.setContent(rulDataToRequesterContent);
         return notification;
     }
 
-    private NotificationHeader createHeader(@NotNull final String requestId,
+    private NotificationHeader createHeader(@NotNull final String requesterNotificationId,
                                             @NotNull final EdcAssetAddress requesterAssetAddress) {
         final NotificationHeader header = new NotificationHeader();
-        header.setNotificationID(requestId);
+        header.setReferencedNotificationID(requesterNotificationId);
 
         setSenderData(header);
         setRecipientData(header, requesterAssetAddress);

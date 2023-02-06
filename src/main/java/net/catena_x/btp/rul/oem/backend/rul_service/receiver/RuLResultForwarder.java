@@ -49,32 +49,44 @@ public class RuLResultForwarder {
 
     public ResponseEntity<DefaultApiResult> forwardResult(
             @NotNull final String supplierNotificationID,
-            @NotNull final RuLNotificationFromSupplierContent supplierNotificatonContent) throws OemRuLException {
+            @Nullable final String alternativeRequesterNotificationId, @Nullable final EdcAssetAddress alternativeAsset,
+            @NotNull final RuLNotificationFromSupplierContent supplierNotificationContent) throws OemRuLException {
 
         try {
-            final RuLOutput result = DataHelper.getFirstAndOnlyItem(supplierNotificatonContent.getRulOutputs());
-            assertIdsEqual(supplierNotificationID, supplierNotificatonContent);
+            final RuLOutput result = DataHelper.getFirstAndOnlyItem(supplierNotificationContent.getRulOutputs());
+            assertIdsEqual(supplierNotificationID, supplierNotificationContent);
 
             final RemainingUsefulLife remainingUsefulLife = result.getRemainingUsefulLife();
-            updateCalculationStatusToCalculated(supplierNotificationID, remainingUsefulLife);
 
-            final RuLCalculation calculation = rulCalculationTable.getByIdNewTransaction(
-                    supplierNotificatonContent.getRequestRefId());
-
-            if(calculation == null) {
-                return apiHelper.failed("Failed to process RuL calculation result, unknown calculation id "
-                        + supplierNotificatonContent.getRequestRefId() + "!");
+            try {
+                updateCalculationStatusToCalculated(supplierNotificationID, remainingUsefulLife);
+            } catch (final Exception exception) {
+                if(alternativeAsset==null) {
+                    throw exception;
+                } else if(!alternativeAsset.isFullyDefined()) {
+                    throw exception;
+                }
             }
 
-            forwardResultWithHttp(supplierNotificationID, calculation.getRequesterResultAddress(), remainingUsefulLife);
+            final RuLCalculation calculation = rulCalculationTable.getByIdNewTransaction(supplierNotificationID);
+
+            if(!alternativeAsset.fillMissingData(calculation.getRequesterResultAddress())) {
+                return apiHelper.failed("Failed to process RuL calculation result, unknown calculation id "
+                        + supplierNotificationID + "!");
+            }
+
+            forwardResultWithHttp(supplierNotificationID,
+                    alternativeRequesterNotificationId != null ?
+                            alternativeRequesterNotificationId : calculation.getRequesterNotificationId(),
+                    alternativeAsset, remainingUsefulLife);
 
             return apiHelper.ok("Forwarded RuL calculation result with id "
-                    + supplierNotificatonContent.getRequestRefId() + " successfully.");
+                    + supplierNotificationID + " successfully.");
         } catch (final Exception exception) {
             try {
-                updateCalculationStatusToFailedProcessing(supplierNotificatonContent.getRequestRefId());
+                updateCalculationStatusToFailedProcessing(supplierNotificationID);
                 return apiHelper.failed("Failed to process RuL calculation with id "
-                        + supplierNotificatonContent.getRequestRefId() + ": " + exception.getMessage());
+                        + supplierNotificationID + ": " + exception.getMessage());
             } catch (final Exception innerException) {
                 return apiHelper.failed("Failed to process RuL calculation result: "
                         + innerException.getMessage());
@@ -83,16 +95,18 @@ public class RuLResultForwarder {
     }
 
     private void updateCalculationStatusToCalculated(
-            @NotNull final String refId, @NotNull final RemainingUsefulLife remainingUsefulLife) throws Exception {
+            @NotNull final String supplierNotificationID, @NotNull final RemainingUsefulLife remainingUsefulLife)
+            throws Exception {
 
         final Supplier<Exception> updateStatus = ()-> {
             try {
-                final RuLCalculation calculation = rulCalculationTable.getByIdExternalTransaction(refId);
-                assertCalculation(refId, calculation);
-                assertCalculationInStaredState(refId, calculation.getStatus());
+                final RuLCalculation calculation =
+                        rulCalculationTable.getByIdExternalTransaction(supplierNotificationID);
+                assertCalculation(supplierNotificationID, calculation);
+                assertCalculationInStaredState(supplierNotificationID, calculation.getStatus());
 
-                rulCalculationTable.updateStatusAndRuLExternalTransaction(refId, RuLCalculationStatus.CALCULATED,
-                        remainingUsefulLife);
+                rulCalculationTable.updateStatusAndRuLExternalTransaction(
+                        supplierNotificationID, RuLCalculationStatus.CALCULATED, remainingUsefulLife);
 
             } catch(final Exception exception) {
                 return exception;
@@ -107,28 +121,33 @@ public class RuLResultForwarder {
         }
     }
 
-    private void forwardResultWithHttp(@NotNull final String calculationId,
+    private void forwardResultWithHttp(@NotNull final String supplierNotificationID,
+                                       @NotNull final String requesterNotificationId,
                                        @NotNull @NotNull final EdcAssetAddress requesterAssetAddress,
                                        @NotNull final RemainingUsefulLife result) throws OemRuLException {
 
         final Notification<RuLDataToRequesterContent> notification =
-                prepareNotification(calculationId, requesterAssetAddress, new RuLDataToRequesterContent(result));
+                prepareNotification(supplierNotificationID, requesterNotificationId, requesterAssetAddress,
+                        new RuLDataToRequesterContent(result));
 
-        logger.info("Forwarding for id " + calculationId + " prepared.");
+        logger.info("Forwarding for id " + supplierNotificationID + " prepared.");
 
-        checkForwardResult(calculationId, forwardToRequester(calculationId, requesterAssetAddress, notification));
+        checkForwardResult(supplierNotificationID,
+                forwardToRequester(supplierNotificationID, requesterAssetAddress, notification));
     }
 
     private Notification<RuLDataToRequesterContent> prepareNotification(
-            @NotNull final String requestId, @NotNull @NotNull final EdcAssetAddress requesterAssetAddress,
+            @NotNull final String supplierNotificationID,
+            @NotNull final String requesterNotificationId,
+            @NotNull @NotNull final EdcAssetAddress requesterAssetAddress,
             @NotNull final RuLDataToRequesterContent rulDataToRequesterContent) throws OemRuLException {
 
         try {
-            return rulRequesterNotificationCreator.createForHttp(requestId, rulDataToRequesterContent,
+            return rulRequesterNotificationCreator.createForHttp(requesterNotificationId, rulDataToRequesterContent,
                                                                  requesterAssetAddress);
         } catch (final Exception exception) {
             try {
-                updateCalculationStatusToFaildBuildRequest(requestId);
+                updateCalculationStatusToFaildBuildRequest(supplierNotificationID);
             } catch (final Exception updateException) {
                 throw new OemRuLException(updateException);
             }
@@ -137,21 +156,22 @@ public class RuLResultForwarder {
         }
     }
 
-    private void checkForwardResult(@NotNull final String requestId,
+    private void checkForwardResult(@NotNull final String supplierNotificationID,
                                     @NotNull final ResponseEntity<JsonNode> result) throws OemRuLException {
         if (result.getStatusCode() == HttpStatus.OK
                 || result.getStatusCode() == HttpStatus.CREATED
                 || result.getStatusCode() == HttpStatus.ACCEPTED) {
-            logger.info("RuL calculation result for id " + requestId + " forwarded.");
+            logger.info("RuL calculation result for id " + supplierNotificationID + " forwarded.");
             try {
-                updateCalculationStatusToSent(requestId);
+                updateCalculationStatusToSent(supplierNotificationID);
             } catch (final Exception exception) {
                 throw new OemRuLException(exception);
             }
         } else {
-            forwardingCallFailed(requestId, "Forwarding RuL calculation result to requester for id \"" +
-                    " + requestId + \" failed: http code " + result.getStatusCode().toString() + ", response body: "
-                    + result.getBody().toString());
+            forwardingCallFailed(supplierNotificationID,
+                    "Forwarding RuL calculation result to requester for id " + supplierNotificationID
+                            + " failed: http code " + result.getStatusCode().toString() + ", response body: "
+                            + result.getBody().toString());
         }
     }
 
@@ -169,7 +189,7 @@ public class RuLResultForwarder {
     }
 
     private ResponseEntity<JsonNode> forwardToRequester(
-            @NotNull final String requestId, @NotNull final EdcAssetAddress requesterAssetAddress,
+            @NotNull final String supplierNotificationID, @NotNull final EdcAssetAddress requesterAssetAddress,
             @NotNull final Notification<RuLDataToRequesterContent> notification) throws OemRuLException {
         try {
             if(rulServiceOptionHelper.isShowOutputToRequester()) {
@@ -182,12 +202,14 @@ public class RuLResultForwarder {
             logger.error("Output to requester can not be mocked: " + exception.getMessage());
         }
 
-        return startAsyncRequest(requestId, requesterAssetAddress.getConnectorUrl(), requesterAssetAddress.getAssetId(),
-                rulNotificationToRequesterConverter.toDAO(notification), JsonNode.class);
+        return startAsyncRequest(supplierNotificationID, requesterAssetAddress.getConnectorUrl(),
+                requesterAssetAddress.getAssetId(), rulNotificationToRequesterConverter.toDAO(notification),
+                JsonNode.class);
     }
 
     public <BodyType, ResponseType> ResponseEntity<ResponseType> startAsyncRequest(
-            @NotNull final String requestId, @NotNull final String endpoint, @NotNull final String asset,
+            @NotNull final String supplierNotificationID,
+            @NotNull final String endpoint, @NotNull final String asset,
             @NotNull final BodyType messageBody, @NotNull Class<ResponseType> responseTypeClass)
             throws OemRuLException {
 
@@ -196,7 +218,7 @@ public class RuLResultForwarder {
                     messageBody, generateDefaultHeaders());
         } catch (final EdcException exception) {
             try {
-                updateCalculationStatusToFailedSending(requestId);
+                updateCalculationStatusToFailedSending(supplierNotificationID);
             } catch(final Exception updateException) {
                 throw new OemRuLException(updateException);
             }
@@ -213,35 +235,42 @@ public class RuLResultForwarder {
         return headers;
     }
 
-    private void updateCalculationStatusToFailedProcessing(@NotNull final String refId) throws Exception {
-        rulCalculationTable.updateStatusNewTransaction(refId, RuLCalculationStatus.FAILED_INTERNAL_PROCESS_RESULTS);
-    }
-
-    private void updateCalculationStatusToFailedSending(@NotNull final String refId) throws Exception {
-        rulCalculationTable.updateStatusNewTransaction(refId, RuLCalculationStatus.SEND_TO_REQUESTER_FAILED);
-    }
-
-    private void updateCalculationStatusToSent(@NotNull final String refId) throws Exception {
-        rulCalculationTable.updateStatusNewTransaction(refId, RuLCalculationStatus.SENT_TO_REQUESTER);
-    }
-
-    private void updateCalculationStatusToFaildBuildRequest(@NotNull final String refId) throws Exception {
+    private void updateCalculationStatusToFailedProcessing(@NotNull final String supplierNotificationID)
+            throws Exception {
         rulCalculationTable.updateStatusNewTransaction(
-                refId, RuLCalculationStatus.FAILED_INTERNAL_BUILD_RESULT_REQUEST);
+                supplierNotificationID, RuLCalculationStatus.FAILED_INTERNAL_PROCESS_RESULTS);
+    }
+
+    private void updateCalculationStatusToFailedSending(@NotNull final String supplierNotificationID) throws Exception {
+        rulCalculationTable.updateStatusNewTransaction(
+                supplierNotificationID, RuLCalculationStatus.SEND_TO_REQUESTER_FAILED);
+    }
+
+    private void updateCalculationStatusToSent(@NotNull final String supplierNotificationID) throws Exception {
+        rulCalculationTable.updateStatusNewTransaction(supplierNotificationID, RuLCalculationStatus.SENT_TO_REQUESTER);
+    }
+
+    private void updateCalculationStatusToFaildBuildRequest(@NotNull final String supplierNotificationID)
+            throws Exception {
+        rulCalculationTable.updateStatusNewTransaction(
+                supplierNotificationID, RuLCalculationStatus.FAILED_INTERNAL_BUILD_RESULT_REQUEST);
     }
 
     private static void assertCalculationInStaredState(
-            @NotNull final String refId, @NotNull final RuLCalculationStatus status) throws OemRuLException {
+            @NotNull final String supplierNotificationID, @NotNull final RuLCalculationStatus status)
+            throws OemRuLException {
         if(status != RuLCalculationStatus.CREATED
                 && status != RuLCalculationStatus.RUNNING) {
-            throw new OemRuLException("Calculation id " + refId + " had status " + status.toString() + "!");
+            throw new OemRuLException("Calculation id " + supplierNotificationID + " had status "
+                    + status.toString() + "!");
         }
     }
 
     private static void assertCalculation(
-            @NotNull final String refId, @Nullable final RuLCalculation calculation) throws OemRuLException {
+            @NotNull final String supplierNotificationID, @Nullable final RuLCalculation calculation)
+            throws OemRuLException {
         if(calculation == null) {
-            throw new OemRuLException("Unknown calculation id " + refId + "!");
+            throw new OemRuLException("Unknown calculation id " + supplierNotificationID + "!");
         }
     }
 

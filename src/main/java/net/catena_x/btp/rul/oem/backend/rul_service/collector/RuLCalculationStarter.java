@@ -70,15 +70,16 @@ public class RuLCalculationStarter {
                         "Vehicle with vin " + vin + " has no data for RuL calculation.");
             }
 
-            final String requestId = generateRequestId();
-            final RuLDataToSupplierContent dataToSupplierContent = rulInputDataBuilder.build(requestId, vehicle);
+            final String supplierNotificationId = generateRequestId();
+            final RuLDataToSupplierContent dataToSupplierContent =
+                    rulInputDataBuilder.build(supplierNotificationId, vehicle);
 
             if(dataToSupplierContent == null) {
                 throw noDataForVehicle(requesterNotificationContent.getVin());
             }
 
-            createNewCalculationInDatabase(requestId, requesterNotificationId, requesterAssetAddress);
-            dispatchRequestWithHttp(requestId, dataToSupplierContent);
+            createNewCalculationInDatabase(supplierNotificationId, requesterNotificationId, requesterAssetAddress);
+            dispatchRequestWithHttp(supplierNotificationId, dataToSupplierContent);
         } catch(final OemRuLLoadSpectrumNotFoundException exception) {
             return failed(RuLStarterCalculationType.REQUIRED_LOAD_SPECTRUM_TYPE_NOT_FOUND, exception.getMessage());
         } catch(final OemRuLNoDataForVehicleException exception) {
@@ -149,56 +150,59 @@ public class RuLCalculationStarter {
     }
 
     private void createNewCalculationInDatabase(
-            @NotNull final String requestId, @NotNull final String requesterNotificationId,
+            @NotNull final String supplierNotificationId, @NotNull final String requesterNotificationId,
             @NotNull final EdcAssetAddress requesterAssetAddress) throws OemRuLException {
-        rulCalculationTable.createNowNewTransaction(requestId, requesterNotificationId, requesterAssetAddress);
+        rulCalculationTable.createNowNewTransaction(supplierNotificationId, requesterNotificationId,
+                requesterAssetAddress);
     }
 
-    private void dispatchRequestWithHttp(@NotNull final String requestId,
+    private void dispatchRequestWithHttp(@NotNull final String supplierNotificationId,
                                          @NotNull final RuLDataToSupplierContent rulDataToSupplierContent)
             throws OemRuLException {
         final Notification<RuLDataToSupplierContent> notification = prepareNotification(
-                requestId, rulDataToSupplierContent);
+                supplierNotificationId, rulDataToSupplierContent);
 
-        logger.info("Request for id " + requestId + " prepared.");
+        logger.info("Request for id " + supplierNotificationId + " prepared.");
 
-        processResult(requestId, callService(requestId, notification));
+        processResult(supplierNotificationId, callService(supplierNotificationId, notification));
     }
 
     private Notification<RuLDataToSupplierContent> prepareNotification(
-            @NotNull final String requestId, @NotNull final RuLDataToSupplierContent rulDataToSupplierContent)
-            throws OemRuLException {
+            @NotNull final String supplierNotificationId,
+            @NotNull final RuLDataToSupplierContent rulDataToSupplierContent) throws OemRuLException {
 
         try {
-            return rulSupplierNotificationCreator.createForHttp(requestId, rulDataToSupplierContent);
+            return rulSupplierNotificationCreator.createForHttp(supplierNotificationId, rulDataToSupplierContent);
         } catch (final Exception exception) {
-            setCalculationStatus(requestId, RuLCalculationStatus.FAILED_INTERNAL_BUILD_CALCULATION_REQUEST);
+            setCalculationStatus(supplierNotificationId,
+                    RuLCalculationStatus.FAILED_INTERNAL_BUILD_CALCULATION_REQUEST);
             throw new OemRuLException(exception);
         }
     }
 
-    private void setCalculationStatus(@NotNull final String requestId, @NotNull final RuLCalculationStatus newStatus)
-            throws OemRuLException {
-        rulCalculationTable.updateStatusNewTransaction(requestId, newStatus);
+    private void setCalculationStatus(@NotNull final String supplierNotificationId,
+                                      @NotNull final RuLCalculationStatus newStatus) throws OemRuLException {
+        rulCalculationTable.updateStatusNewTransaction(supplierNotificationId, newStatus);
     }
 
-    private void processResult(@NotNull final String requestId, @NotNull final ResponseEntity<JsonNode> result)
+    private void processResult(@NotNull final String supplierNotificationId,
+                               @NotNull final ResponseEntity<JsonNode> result)
             throws OemRuLException {
 
         if (result.getStatusCode() == HttpStatus.OK
                 || result.getStatusCode() == HttpStatus.CREATED
                 || result.getStatusCode() == HttpStatus.ACCEPTED) {
-            logger.info("External calculation service for id " + requestId + " started.");
-            setCalculationStatus(requestId, RuLCalculationStatus.RUNNING);
+            logger.info("External calculation service for id " + supplierNotificationId + " started.");
+            setCalculationStatus(supplierNotificationId, RuLCalculationStatus.RUNNING);
         } else {
             throw new OemRuLSupplierCalculationServiceFailedException(
-                        "Starting external calculation service for id \" + requestId + \" failed: "
+                        "Starting external calculation service for id " + supplierNotificationId + " failed: "
                                     + "http code " + result.getStatusCode().toString() + ", response body: "
                                     + result.getBody().toString());
         }
     }
 
-    private ResponseEntity<JsonNode> callService(@NotNull final String requestId,
+    private ResponseEntity<JsonNode> callService(@NotNull final String supplierNotificationId,
             @NotNull final Notification<RuLDataToSupplierContent> notification) throws OemRuLException {
 
         try {
@@ -212,12 +216,12 @@ public class RuLCalculationStarter {
             logger.error("Input to supplier can not be mocked: " + exception.getMessage());
         }
 
-        return startAsyncRequest(requestId, supplierRuLServiceEndpoint.toString(), inputAssetId,
+        return startAsyncRequest(supplierNotificationId, supplierRuLServiceEndpoint.toString(), inputAssetId,
                 rulNotificationToSupplierConverter.toDAO(notification), JsonNode.class);
     }
 
     public <BodyType, ResponseType> ResponseEntity<ResponseType> startAsyncRequest(
-            @NotNull final String requestId, @NotNull final String endpoint, @NotNull final String asset,
+            @NotNull final String supplierNotificationId, @NotNull final String endpoint, @NotNull final String asset,
             @NotNull final BodyType messageBody, @NotNull Class<ResponseType> responseTypeClass)
             throws OemRuLException {
 
@@ -225,7 +229,7 @@ public class RuLCalculationStarter {
             return edcApi.post(HttpUrl.parse(endpoint), asset, responseTypeClass,
                     messageBody, generateDefaultHeaders());
         } catch (final EdcException exception) {
-            setCalculationStatus(requestId, RuLCalculationStatus.FAILED_EXTERNAL);
+            setCalculationStatus(supplierNotificationId, RuLCalculationStatus.FAILED_EXTERNAL);
             throw new OemRuLSupplierCalculationServiceFailedException(exception);
         }
     }
