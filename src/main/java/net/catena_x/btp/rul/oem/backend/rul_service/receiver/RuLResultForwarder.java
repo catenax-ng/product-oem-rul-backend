@@ -18,6 +18,7 @@ import net.catena_x.btp.rul.oem.backend.rul_service.notifications.dto.requester.
 import net.catena_x.btp.rul.oem.backend.rul_service.notifications.dto.supplierservice.RuLNotificationFromSupplierContent;
 import net.catena_x.btp.rul.oem.backend.rul_service.notifications.dto.supplierservice.items.RuLOutput;
 import net.catena_x.btp.rul.oem.backend.rul_service.receiver.util.RuLRequesterNotificationCreator;
+import net.catena_x.btp.rul.oem.backend.util.enums.RuLServiceOptionHelper;
 import net.catena_x.btp.rul.oem.util.exceptions.OemRuLException;
 import okhttp3.HttpUrl;
 import org.jetbrains.annotations.Nullable;
@@ -41,6 +42,8 @@ public class RuLResultForwarder {
     @Autowired private RuLNotificationToRequesterConverter rulNotificationToRequesterConverter;
     @Autowired private RuLRequesterNotificationCreator rulRequesterNotificationCreator;
     @Autowired private EdcApi edcApi;
+    @Autowired private RuLServiceOptionHelper rulServiceOptionHelper;
+    @Autowired private ObjectMapper objectMapper;
 
     private final Logger logger = LoggerFactory.getLogger(RuLResultForwarder.class);
 
@@ -168,22 +171,25 @@ public class RuLResultForwarder {
     private ResponseEntity<JsonNode> forwardToRequester(
             @NotNull final String requestId, @NotNull final EdcAssetAddress requesterAssetAddress,
             @NotNull final Notification<RuLDataToRequesterContent> notification) throws OemRuLException {
+        try {
+            if(rulServiceOptionHelper.isShowOutputToRequester()) {
+                System.out.println("=======================");
+                System.out.println("RuL output to requester:");
+                System.out.println(objectMapper.writeValueAsString(notification));
+                System.out.println("=======================");
+            }
+        } catch (final Exception exception) {
+            logger.error("Output to requester can not be mocked: " + exception.getMessage());
+        }
+
         return startAsyncRequest(requestId, requesterAssetAddress.getConnectorUrl(), requesterAssetAddress.getAssetId(),
                 rulNotificationToRequesterConverter.toDAO(notification), JsonNode.class);
     }
 
-    @Autowired
-    ObjectMapper objectMapper;
     public <BodyType, ResponseType> ResponseEntity<ResponseType> startAsyncRequest(
             @NotNull final String requestId, @NotNull final String endpoint, @NotNull final String asset,
             @NotNull final BodyType messageBody, @NotNull Class<ResponseType> responseTypeClass)
             throws OemRuLException {
-
-        String test = "";
-        try{
-            test = objectMapper.writeValueAsString(messageBody);
-        } catch (Exception e) {}
-
 
         try {
             return edcApi.post(HttpUrl.parse(endpoint), asset, responseTypeClass,

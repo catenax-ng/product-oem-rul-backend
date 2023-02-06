@@ -1,5 +1,6 @@
 package net.catena_x.btp.rul.oem.backend.rul_service.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.catena_x.btp.libraries.notification.dao.NotificationDAO;
 import net.catena_x.btp.libraries.util.apihelper.ApiHelper;
 import net.catena_x.btp.libraries.util.apihelper.model.DefaultApiResult;
@@ -8,6 +9,7 @@ import net.catena_x.btp.rul.oem.backend.rul_service.notifications.dao.supplierse
 import net.catena_x.btp.rul.oem.backend.rul_service.notifications.dto.supplierservice.RuLNotificationFromSupplierContentConverter;
 import net.catena_x.btp.rul.oem.backend.rul_service.receiver.RuLResultForwarder;
 import net.catena_x.btp.rul.oem.backend.rul_service.util.RuLStarterApiResult;
+import net.catena_x.btp.rul.oem.backend.util.enums.RuLServiceOptionHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +28,8 @@ public class RuLBackendReceiverControllerNotifyResult {
     @Autowired private ApiHelper apiHelper;
     @Autowired private RuLResultForwarder rulResultForwarder;
     @Autowired private RuLNotificationFromSupplierContentConverter rulNotificationFromSupplierContentConverter;
+    @Autowired private RuLServiceOptionHelper rulServiceOptionHelper;
+    @Autowired private ObjectMapper objectMapper;
 
     private final Logger logger = LoggerFactory.getLogger(RuLBackendReceiverControllerNotifyResult.class);
 
@@ -75,6 +79,18 @@ public class RuLBackendReceiverControllerNotifyResult {
     )
     public ResponseEntity<DefaultApiResult> notifyResult(
             @RequestBody @NotNull NotificationDAO<RuLNotificationFromSupplierContentDAO> result) {
+
+        try {
+            if(rulServiceOptionHelper.isShowOutputFromSupplier()) {
+                System.out.println("=======================");
+                System.out.println("RuL output from supplier:");
+                System.out.println(objectMapper.writeValueAsString(result));
+                System.out.println("=======================");
+            }
+        } catch (final Exception exception) {
+            logger.error("Output from supplier can not be mocked: " + exception.getMessage());
+        }
+
         try {
             return rulResultForwarder.forwardResult(result.getHeader().getReferencedNotificationID(),
                     rulNotificationFromSupplierContentConverter.toDTO(result.getContent()));

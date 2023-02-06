@@ -23,24 +23,25 @@ public class RuLServiceOptionTable {
         return internal.runSerializableExternalTransaction(function);
     }
 
-    public void setInfoItemNewTransaction(@NotNull final RuLServiceOptionType key, @NotNull final String value)
+    public void setServiceOptionNewTransaction(@NotNull final RuLServiceOptionType key, @NotNull final String value)
             throws OemRuLException {
-        internal.setInfoItemNewTransaction(key, value);
+        internal.setServiceOptionNewTransaction(key, value);
     }
 
-    public void setInfoItemExternalTransaction(@NotNull final RuLServiceOptionType key, @NotNull final String value)
-            throws OemRuLException {
-        internal.setInfoItemExternalTransaction(key, value);
+    public void setServiceOptionExternalTransaction(@NotNull final RuLServiceOptionType key,
+                                                    @NotNull final String value) throws OemRuLException {
+        internal.setServiceOptionExternalTransaction(key, value);
     }
 
-    public void updateInfoItemNewTransaction(@NotNull final RuLServiceOptionType key, @NotNull final String value)
+    public void updateServiceOptionNewTransaction(@NotNull final RuLServiceOptionType key,
+                                                  @NotNull final String value)
             throws OemRuLException {
-        internal.updateInfoItemNewTransaction(key, value);
+        internal.updateServiceOptionNewTransaction(key, value);
     }
 
-    public void updateInfoItemExternalTransaction(@NotNull final RuLServiceOptionType key, @NotNull final String value)
-            throws OemRuLException {
-        internal.updateInfoItemExternalTransaction(key, value);
+    public void updateServiceOptionExternalTransaction(@NotNull final RuLServiceOptionType key,
+                                                       @NotNull final String value) throws OemRuLException {
+        internal.updateServiceOptionExternalTransaction(key, value);
     }
 
     public void deleteAllNewTransaction() throws OemRuLException {
@@ -59,22 +60,23 @@ public class RuLServiceOptionTable {
         internal.deleteExternalTransaction(key);
     }
 
-    public String getInfoValueNewTransaction(@NotNull final RuLServiceOptionType key) throws OemRuLException {
-        return internal.getInfoValueNewTransaction(key);
+    public String getServiceOptionValueNewTransaction(@NotNull final RuLServiceOptionType key) throws OemRuLException {
+        return internal.getServiceOptionValueNewTransaction(key);
     }
 
-    public String getInfoValueExternalTransaction(@NotNull final RuLServiceOptionType key) throws OemRuLException {
-        return internal.getInfoValueExternalTransaction(key);
-    }
-
-    public RuLServiceOption getInfoItemNewTransaction(@NotNull final RuLServiceOptionType key)
+    public String getServiceOptionValueExternalTransaction(@NotNull final RuLServiceOptionType key)
             throws OemRuLException {
-        return rulServiceOptionConverter.toDTO(internal.getInfoItemNewTransaction(key));
+        return internal.getServiceOptionValueExternalTransaction(key);
     }
 
-    public RuLServiceOption getInfoItemExternalTransaction(@NotNull final RuLServiceOptionType key)
+    public RuLServiceOption getServiceOptionNewTransaction(@NotNull final RuLServiceOptionType key)
             throws OemRuLException {
-        return rulServiceOptionConverter.toDTO(internal.getInfoItemExternalTransaction(key));
+        return rulServiceOptionConverter.toDTO(internal.getServiceOptionNewTransaction(key));
+    }
+
+    public RuLServiceOption getServiceOptionExternalTransaction(@NotNull final RuLServiceOptionType key)
+            throws OemRuLException {
+        return rulServiceOptionConverter.toDTO(internal.getServiceOptionExternalTransaction(key));
     }
 
     public List<RuLServiceOption> getAllNewTransaction() throws OemRuLException {

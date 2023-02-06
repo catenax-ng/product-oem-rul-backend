@@ -33,55 +33,55 @@ public class RuLServiceOptionTableInternal extends RuLTableBase {
     }
 
     @RuLTransactionDefaultUseExisting
-    public void setInfoItemExternalTransaction(@NotNull final RuLServiceOptionType key, @NotNull final String value)
+    public void setServiceOptionExternalTransaction(@NotNull final RuLServiceOptionType key, @NotNull final String value)
             throws OemRuLException {
         try {
             rulServiceOptionRepository.insert(key.toString(), value);
         } catch (final Exception exception) {
             logger.error(exception.getMessage());
             exception.printStackTrace();
-            throw failed("Inserting info value failed! " + exception.getMessage(), exception);
+            throw failed("Inserting service option failed! " + exception.getMessage(), exception);
         }
     }
 
     @RuLTransactionDefaultCreateNew
-    public void setInfoItemNewTransaction(@NotNull final RuLServiceOptionType key, @NotNull final String value)
+    public void setServiceOptionNewTransaction(@NotNull final RuLServiceOptionType key, @NotNull final String value)
             throws OemRuLException {
-        setInfoItemExternalTransaction(key, value);
+        setServiceOptionExternalTransaction(key, value);
     }
 
     @RuLTransactionDefaultUseExisting
-    public void updateInfoItemExternalTransaction(@NotNull final RuLServiceOptionType key, @NotNull final String value)
+    public void updateServiceOptionExternalTransaction(@NotNull final RuLServiceOptionType key, @NotNull final String value)
             throws OemRuLException {
         try {
             rulServiceOptionRepository.update(key.toString(), value);
         } catch (final Exception exception) {
             logger.error(exception.getMessage());
             exception.printStackTrace();
-            throw failed("Updating info value failed! " + exception.getMessage(), exception);
+            throw failed("Updating service option failed! " + exception.getMessage(), exception);
         }
     }
 
     @RuLTransactionDefaultCreateNew
-    public void updateInfoItemNewTransaction(@NotNull final RuLServiceOptionType key, @NotNull final String value)
+    public void updateServiceOptionNewTransaction(@NotNull final RuLServiceOptionType key, @NotNull final String value)
             throws OemRuLException {
-        updateInfoItemExternalTransaction(key, value);
+        updateServiceOptionExternalTransaction(key, value);
     }
 
     @RuLTransactionDefaultUseExisting
-    public RuLServiceOptionDAO getInfoItemExternalTransaction(@NotNull final RuLServiceOptionType key) throws OemRuLException {
+    public RuLServiceOptionDAO getServiceOptionExternalTransaction(@NotNull final RuLServiceOptionType key) throws OemRuLException {
         try {
             return rulServiceOptionRepository.queryByKey(key.toString());
         } catch (final Exception exception) {
             logger.error(exception.getMessage());
             exception.printStackTrace();
-            throw failed("Reading info item failed! " + exception.getMessage(), exception);
+            throw failed("Reading service option failed! " + exception.getMessage(), exception);
         }
     }
 
     @RuLTransactionDefaultCreateNew
-    public RuLServiceOptionDAO getInfoItemNewTransaction(@NotNull final RuLServiceOptionType key) throws OemRuLException {
-        return getInfoItemExternalTransaction(key);
+    public RuLServiceOptionDAO getServiceOptionNewTransaction(@NotNull final RuLServiceOptionType key) throws OemRuLException {
+        return getServiceOptionExternalTransaction(key);
     }
 
     @RuLTransactionDefaultUseExisting
@@ -91,7 +91,7 @@ public class RuLServiceOptionTableInternal extends RuLTableBase {
         } catch (final Exception exception) {
             logger.error(exception.getMessage());
             exception.printStackTrace();
-            throw failed("Reading all info items failed! " + exception.getMessage(), exception);
+            throw failed("Reading all service options failed! " + exception.getMessage(), exception);
         }
     }
 
@@ -107,7 +107,7 @@ public class RuLServiceOptionTableInternal extends RuLTableBase {
         } catch (final Exception exception) {
             logger.error(exception.getMessage());
             exception.printStackTrace();
-            throw failed("Deleting all info items failed! " + exception.getMessage(), exception);
+            throw failed("Deleting all service options failed! " + exception.getMessage(), exception);
         }
     }
 
@@ -123,7 +123,7 @@ public class RuLServiceOptionTableInternal extends RuLTableBase {
         } catch (final Exception exception) {
             logger.error(exception.getMessage());
             exception.printStackTrace();
-            throw failed("Deleting info item failed! " + exception.getMessage(), exception);
+            throw failed("Deleting service option failed! " + exception.getMessage(), exception);
         }
     }
 
@@ -133,12 +133,19 @@ public class RuLServiceOptionTableInternal extends RuLTableBase {
     }
 
     @RuLTransactionDefaultUseExisting
-    public String getInfoValueExternalTransaction(@NotNull final RuLServiceOptionType key) throws OemRuLException {
-        return getInfoItemExternalTransaction(key).getValue();
+    public String getServiceOptionValueExternalTransaction(@NotNull final RuLServiceOptionType key)
+            throws OemRuLException {
+        final RuLServiceOptionDAO element = getServiceOptionExternalTransaction(key);
+        if(element == null) {
+            return null;
+        }
+
+        return element.getValue();
     }
 
     @RuLTransactionDefaultCreateNew
-    public String getInfoValueNewTransaction(@NotNull final RuLServiceOptionType key) throws OemRuLException {
-        return getInfoValueExternalTransaction(key);
+    public String getServiceOptionValueNewTransaction(@NotNull final RuLServiceOptionType key)
+            throws OemRuLException {
+        return getServiceOptionValueExternalTransaction(key);
     }
 }

@@ -1,5 +1,6 @@
 package net.catena_x.btp.rul.oem.backend.rul_service.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.catena_x.btp.libraries.edc.model.EdcAssetAddress;
 import net.catena_x.btp.libraries.notification.dao.NotificationDAO;
 import net.catena_x.btp.libraries.util.apihelper.ApiHelper;
@@ -10,6 +11,7 @@ import net.catena_x.btp.rul.oem.backend.rul_service.controller.swagger.Collector
 import net.catena_x.btp.rul.oem.backend.rul_service.notifications.dao.requester.RuLNotificationFromRequesterContentDAO;
 import net.catena_x.btp.rul.oem.backend.rul_service.notifications.dto.requester.RuLNotificationFromRequesterContentConverter;
 import net.catena_x.btp.rul.oem.backend.rul_service.util.RuLStarterApiResult;
+import net.catena_x.btp.rul.oem.backend.util.enums.RuLServiceOptionHelper;
 import net.catena_x.btp.rul.oem.backend.util.enums.RuLStarterCalculationType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +32,8 @@ public class RuLBackendCollectorControllerNotifyCalculation {
     @Autowired private ApiHelper apiHelper;
     @Autowired private RuLCalculationStarter rulCalculationStarter;
     @Autowired private RuLNotificationFromRequesterContentConverter rulNotificationFromRequesterContentConverter;
+    @Autowired private RuLServiceOptionHelper rulServiceOptionHelper;
+    @Autowired private ObjectMapper objectMapper;
 
     private final Logger logger = LoggerFactory.getLogger(RuLBackendCollectorControllerNotifyCalculation.class);
 
@@ -79,6 +83,17 @@ public class RuLBackendCollectorControllerNotifyCalculation {
     )
     public ResponseEntity<RuLStarterApiResult> notifyCalculation(
             @RequestBody @NotNull NotificationDAO<RuLNotificationFromRequesterContentDAO> request) {
+        try {
+            if(rulServiceOptionHelper.isShowInputFromRequester()) {
+                System.out.println("=======================");
+                System.out.println("RuL input from requester:");
+                System.out.println(objectMapper.writeValueAsString(request));
+                System.out.println("=======================");
+            }
+        } catch (final Exception exception) {
+            logger.error("Input from requester can not be mocked: " + exception.getMessage());
+        }
+
         try {
             return rulCalculationStarter.startCalculation(request.getHeader().getNotificationID(),
                     EdcAssetAddress.replyAddressFromNotification(request),

@@ -1,6 +1,7 @@
 package net.catena_x.btp.rul.oem.backend.rul_service.collector;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.catena_x.btp.libraries.edc.EdcApi;
 import net.catena_x.btp.libraries.edc.model.EdcAssetAddress;
 import net.catena_x.btp.libraries.edc.util.exceptions.EdcException;
@@ -19,6 +20,7 @@ import net.catena_x.btp.rul.oem.backend.rul_service.notifications.dto.requester.
 import net.catena_x.btp.rul.oem.backend.rul_service.notifications.dto.supplierservice.RuLDataToSupplierContent;
 import net.catena_x.btp.rul.oem.backend.rul_service.notifications.dto.supplierservice.RuLNotificationToSupplierConverter;
 import net.catena_x.btp.rul.oem.backend.rul_service.util.RuLStarterApiResult;
+import net.catena_x.btp.rul.oem.backend.util.enums.RuLServiceOptionHelper;
 import net.catena_x.btp.rul.oem.backend.util.enums.RuLStarterCalculationType;
 import net.catena_x.btp.rul.oem.util.exceptions.OemRuLException;
 import okhttp3.HttpUrl;
@@ -48,6 +50,8 @@ public class RuLCalculationStarter {
     @Autowired private RuLInputDataBuilder rulInputDataBuilder;
     @Autowired private RuLCalculationTable rulCalculationTable;
     @Autowired private EdcApi edcApi;
+    @Autowired private RuLServiceOptionHelper rulServiceOptionHelper;
+    @Autowired private ObjectMapper objectMapper;
 
     @Value("${supplier.rulservice.inputAssetName}") private String inputAssetName;
     @Value("${supplier.rulservice.endpoint}") private URL supplierRuLServiceEndpoint;
@@ -194,9 +198,20 @@ public class RuLCalculationStarter {
         }
     }
 
-    private ResponseEntity<JsonNode> callService(
-            @NotNull final String requestId, @NotNull final Notification<RuLDataToSupplierContent> notification)
-            throws OemRuLException {
+    private ResponseEntity<JsonNode> callService(@NotNull final String requestId,
+            @NotNull final Notification<RuLDataToSupplierContent> notification) throws OemRuLException {
+
+        try {
+            if(rulServiceOptionHelper.isShowInputToSupplier()) {
+                System.out.println("=======================");
+                System.out.println("RuL input to supplier:");
+                System.out.println(objectMapper.writeValueAsString(notification));
+                System.out.println("=======================");
+            }
+        } catch (final Exception exception) {
+            logger.error("Input to supplier can not be mocked: " + exception.getMessage());
+        }
+
         return startAsyncRequest(requestId, supplierRuLServiceEndpoint.toString(), inputAssetName,
                 rulNotificationToSupplierConverter.toDAO(notification), JsonNode.class);
     }
