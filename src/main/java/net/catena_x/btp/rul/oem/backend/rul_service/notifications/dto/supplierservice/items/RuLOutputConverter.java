@@ -10,10 +10,10 @@ import javax.validation.constraints.NotNull;
 public class RuLOutputConverter extends DAOConverter<RuLOutputDAO, RuLOutput> {
 
     protected RuLOutput toDTOSourceExists(@NotNull final RuLOutputDAO source) {
-        return new RuLOutput(source.getComponentId(), source.getRemainingUsefulLife());
+        return new RuLOutput(source.getComponentId(), source.getComponentType(), source.getRemainingUsefulLife());
     }
 
     protected RuLOutputDAO toDAOSourceExists(@NotNull final RuLOutput source) {
-        return new RuLOutputDAO(source.getComponentId(), source.getRemainingUsefulLife());
+        return new RuLOutputDAO(source.getComponentId(), source.getComponentType(), source.getRemainingUsefulLife());
     }
 }

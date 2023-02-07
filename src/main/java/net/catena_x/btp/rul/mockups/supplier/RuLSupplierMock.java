@@ -47,7 +47,8 @@ public class RuLSupplierMock {
 
         final List<RuLOutputDAO> outputs = new ArrayList<>(rulInputs.size());
         for (final RuLInputDAO inputData: rulInputs) {
-            outputs.add(new RuLOutputDAO(inputData.getComponentId(), generateRemainingUsefulLife()));
+            outputs.add(new RuLOutputDAO(inputData.getComponentId(),
+                    "GearBox", generateRemainingUsefulLife()));
         }
 
         final Notification<RuLNotificationFromSupplierContentDAO> notification = new Notification<>();
@@ -56,6 +57,7 @@ public class RuLSupplierMock {
 
         notification.setContent(new RuLNotificationFromSupplierContentDAO());
         notification.getContent().setRequestRefId(data.getContent().getRequestRefId());
+        notification.getContent().setComponentType("GearBox");
         notification.getContent().setEndurancePredictorOutputs(outputs);
 
         new Thread(() ->
