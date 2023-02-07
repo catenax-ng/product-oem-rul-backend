@@ -277,8 +277,10 @@ public class RuLResultForwarder {
     private static void assertIdsEqual(@NotNull final String supplierNotificationID,
                                        @NotNull final RuLNotificationFromSupplierContent supplierNotificatonContent)
             throws OemRuLException {
-        if (!supplierNotificationID.equals(supplierNotificatonContent.getRequestRefId())) {
-            throw new OemRuLException("Id in notification content is not equal to referenced notification id!");
+        if(supplierNotificatonContent.getRequestRefId() != null) {
+            if (!supplierNotificationID.equals(supplierNotificatonContent.getRequestRefId())) {
+                throw new OemRuLException("Id in notification content is not equal to referenced notification id!");
+            }
         }
     }
 }
