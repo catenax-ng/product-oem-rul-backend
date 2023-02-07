@@ -53,7 +53,7 @@ public class RuLResultForwarder {
             @NotNull final RuLNotificationFromSupplierContent supplierNotificationContent) throws OemRuLException {
 
         try {
-            final RuLOutput result = DataHelper.getFirstAndOnlyItem(supplierNotificationContent.getRulOutputs());
+            final RuLOutput result = DataHelper.getFirstAndOnlyItem(supplierNotificationContent.getEndurancePredictorOutputs());
             assertIdsEqual(supplierNotificationID, supplierNotificationContent);
 
             final RemainingUsefulLife remainingUsefulLife = result.getRemainingUsefulLife();

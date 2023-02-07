@@ -56,7 +56,7 @@ public class RuLSupplierMock {
 
         notification.setContent(new RuLNotificationFromSupplierContentDAO());
         notification.getContent().setRequestRefId(data.getContent().getRequestRefId());
-        notification.getContent().setRulOutputs(outputs);
+        notification.getContent().setEndurancePredictorOutputs(outputs);
 
         new Thread(() ->
         {

@@ -17,5 +17,5 @@ import java.util.List;
 public class RuLNotificationFromSupplierContentDAO {
     private String requestRefId;
     private String componentType;
-    private List<RuLOutputDAO> rulOutputs;
+    private List<RuLOutputDAO> endurancePredictorOutputs;
 }
