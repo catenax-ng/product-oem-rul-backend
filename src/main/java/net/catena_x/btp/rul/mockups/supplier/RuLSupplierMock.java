@@ -115,7 +115,7 @@ public class RuLSupplierMock {
 
     private RemainingUsefulLife generateRemainingUsefulLife() {
         return new RemainingUsefulLife(4314.0f, "4314", 123458,
-                        new BammLoaddataSource("loggedOEM", "loggedOEM"),
+                        new BammLoaddataSource("loggedOEM", "loggedOEM", null),
                         new BammStatus(Instant.now() , "840", 840.0f, 99331));
     }
 }
