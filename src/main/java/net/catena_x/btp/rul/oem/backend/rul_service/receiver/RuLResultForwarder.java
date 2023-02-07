@@ -51,10 +51,13 @@ public class RuLResultForwarder {
     public ResponseEntity<DefaultApiResult> forwardResult(
             @NotNull final String supplierNotificationID,
             @Nullable final String alternativeRequesterNotificationId, @Nullable final EdcAssetAddress alternativeAsset,
-            @NotNull final RuLNotificationFromSupplierContent supplierNotificationContent) throws OemRuLException {
+            @NotNull final RuLNotificationFromSupplierContent supplierNotificationContent,
+            @NotNull final boolean ignoreAdditionalResults) {
 
         try {
-            final RuLOutput result = DataHelper.getFirstAndOnlyItem(supplierNotificationContent.getEndurancePredictorOutputs());
+            final RuLOutput result = ignoreAdditionalResults
+                    ? DataHelper.getFirstItem(supplierNotificationContent.getEndurancePredictorOutputs())
+                    : DataHelper.getFirstAndOnlyItem(supplierNotificationContent.getEndurancePredictorOutputs());
             assertIdsEqual(supplierNotificationID, supplierNotificationContent);
 
             final RemainingUsefulLife remainingUsefulLife = result.getRemainingUsefulLife();

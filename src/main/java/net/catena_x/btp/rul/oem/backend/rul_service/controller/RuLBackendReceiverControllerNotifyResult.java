@@ -81,7 +81,8 @@ public class RuLBackendReceiverControllerNotifyResult {
             @RequestParam(required = false) @Nullable String forwardEdcAddress,
             @RequestParam(required = false) @Nullable String forwardBPN,
             @RequestParam(required = false) @Nullable String forwardAssetId,
-            @RequestParam(required = false) @Nullable String forwardRefId) {
+            @RequestParam(required = false) @Nullable String forwardRefId,
+            @RequestParam(required = false) @Nullable Boolean allowAdditionalResults) {
 
         try {
             if(rulServiceOptionHelper.isShowOutputFromSupplier()) {
@@ -99,9 +100,12 @@ public class RuLBackendReceiverControllerNotifyResult {
         alternativeAsset.setBpn(forwardBPN);
         alternativeAsset.setAssetId(forwardAssetId);
 
+        boolean ignoreAdditionalResults = (allowAdditionalResults==null) ? true : !allowAdditionalResults;
+
         try {
             return rulResultForwarder.forwardResult(result.getHeader().getReferencedNotificationID(), forwardRefId,
-                    alternativeAsset, rulNotificationFromSupplierContentConverter.toDTO(result.getContent()));
+                    alternativeAsset, rulNotificationFromSupplierContentConverter.toDTO(result.getContent()),
+                    ignoreAdditionalResults);
         } catch(final Exception exception){
             return apiHelper.failed("Forwarding result failed: " + exception.getMessage());
         }
