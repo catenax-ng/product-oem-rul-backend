@@ -17,7 +17,7 @@ public class RuLNotificationFromSupplierContentConverter
             @NotNull final RuLNotificationFromSupplierContentDAO source) {
 
         return new RuLNotificationFromSupplierContent(
-                source.getRequestRefId(),
+                source.getRequestRefId(), source.getComponentType(),
                 rulOutputConverter.toDTO(source.getRulOutputs()));
     }
 
@@ -25,7 +25,7 @@ public class RuLNotificationFromSupplierContentConverter
             @NotNull final RuLNotificationFromSupplierContent source) {
 
         return new RuLNotificationFromSupplierContentDAO(
-                source.getRequestRefId(),
+                source.getRequestRefId(), source.getComponentType(),
                 rulOutputConverter.toDAO(source.getRulOutputs())
         );
     }
