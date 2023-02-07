@@ -1,5 +1,6 @@
 package net.catena_x.btp.rul.oem.backend.rul_service.receiver;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.catena_x.btp.libraries.bamm.custom.remainingusefullife.RemainingUsefulLife;
@@ -85,11 +86,14 @@ public class RuLResultForwarder {
         } catch (final Exception exception) {
             try {
                 updateCalculationStatusToFailedProcessing(supplierNotificationID);
-                return apiHelper.failed("Failed to process RuL calculation with id "
-                        + supplierNotificationID + ": " + exception.getMessage());
+                final String error = "Failed to process RuL calculation with id "
+                        + supplierNotificationID + ": " + exception.getMessage();
+                logger.error(error);
+                return apiHelper.failed(error);
             } catch (final Exception innerException) {
-                return apiHelper.failed("Failed to process RuL calculation result: "
-                        + innerException.getMessage());
+                final String error = "Failed to process RuL calculation result: " + innerException.getMessage();
+                logger.error(error);
+                return apiHelper.failed(error);
             }
         }
     }
@@ -132,7 +136,7 @@ public class RuLResultForwarder {
 
         logger.info("Forwarding for id " + supplierNotificationID + " prepared.");
 
-        checkForwardResult(supplierNotificationID,
+        checkForwardResult(supplierNotificationID, notification,
                 forwardToRequester(supplierNotificationID, requesterAssetAddress, notification));
     }
 
@@ -157,6 +161,7 @@ public class RuLResultForwarder {
     }
 
     private void checkForwardResult(@NotNull final String supplierNotificationID,
+                                    @NotNull final Notification<RuLDataToRequesterContent> notification,
                                     @NotNull final ResponseEntity<JsonNode> result) throws OemRuLException {
         if (result.getStatusCode() == HttpStatus.OK
                 || result.getStatusCode() == HttpStatus.CREATED
@@ -168,10 +173,17 @@ public class RuLResultForwarder {
                 throw new OemRuLException(exception);
             }
         } else {
+            String notificationAsString = null;
+            try {
+                notificationAsString = objectMapper.writeValueAsString(notification);
+            } catch (final JsonProcessingException exception) {
+                notificationAsString = "JSON parse error!";
+            }
+
             forwardingCallFailed(supplierNotificationID,
                     "Forwarding RuL calculation result to requester for id " + supplierNotificationID
                             + " failed: http code " + result.getStatusCode().toString() + ", response body: "
-                            + result.getBody().toString());
+                            + result.getBody().toString() + " \nNotification: " + notificationAsString);
         }
     }
 
