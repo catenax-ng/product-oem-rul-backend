@@ -78,10 +78,10 @@ public class RuLBackendReceiverControllerNotifyResult {
     )
     public ResponseEntity<DefaultApiResult> notifyResult(
             @RequestBody @NotNull NotificationDAO<RuLNotificationFromSupplierContentDAO> result,
-            @RequestParam @Nullable String forwardEdcAddress,
-            @RequestParam @Nullable String forwardBPN,
-            @RequestParam @Nullable String forwardAssetId,
-            @RequestParam @Nullable String forwardRefId) {
+            @RequestParam(required = false) @Nullable String forwardEdcAddress,
+            @RequestParam(required = false) @Nullable String forwardBPN,
+            @RequestParam(required = false) @Nullable String forwardAssetId,
+            @RequestParam(required = false) @Nullable String forwardRefId) {
 
         try {
             if(rulServiceOptionHelper.isShowOutputFromSupplier()) {
