@@ -42,45 +42,56 @@ public class RuLSupplierMock {
 
     public ResponseEntity<DefaultApiResult> runRuLCalculationMock(
                 @NotNull final NotificationDAO<RuLNotificationToSupplierContentDAO> data) {
-        final List<RuLInputDAO> rulInputs = data.getContent().getEndurancePredictorInputs();
-        rulInputs.sort(Comparator.comparing(RuLInputDAO::getComponentId));
 
-        final List<RuLOutputDAO> outputs = new ArrayList<>(rulInputs.size());
-        for (final RuLInputDAO inputData: rulInputs) {
-            outputs.add(new RuLOutputDAO(inputData.getComponentId(),
-                    "GearBox", generateRemainingUsefulLife()));
-        }
+        try {
+            final List<RuLInputDAO> rulInputs = data.getContent().getEndurancePredictorInputs();
+            rulInputs.sort(Comparator.comparing(RuLInputDAO::getComponentId));
 
-        final Notification<RuLNotificationFromSupplierContentDAO> notification = new Notification<>();
-        notification.setHeader(new NotificationHeader());
-        notification.getHeader().setReferencedNotificationID(data.getContent().getRequestRefId());
-
-        notification.setContent(new RuLNotificationFromSupplierContentDAO());
-        notification.getContent().setRequestRefId(data.getContent().getRequestRefId());
-        notification.getContent().setComponentType("GearBox");
-        notification.getContent().setEndurancePredictorOutputs(outputs);
-
-        new Thread(() ->
-        {
-            try {
-                Thread.sleep(2000L);
-            } catch (InterruptedException exception) {
+            final List<RuLOutputDAO> outputs = new ArrayList<>(rulInputs.size());
+            for (final RuLInputDAO inputData : rulInputs) {
+                outputs.add(new RuLOutputDAO(inputData.getComponentId(),
+                        "GearBox", generateRemainingUsefulLife()));
             }
 
-            final HttpUrl requestUrl = HttpUrl.parse("http://localhost:25554/")
+            final Notification<RuLNotificationFromSupplierContentDAO> notification = new Notification<>();
+            notification.setHeader(new NotificationHeader());
+            notification.getHeader().setReferencedNotificationID(data.getContent().getRequestRefId());
+
+            notification.setContent(new RuLNotificationFromSupplierContentDAO());
+            notification.getContent().setRequestRefId(data.getContent().getRequestRefId());
+            notification.getContent().setComponentType("GearBox");
+            notification.getContent().setEndurancePredictorOutputs(outputs);
+
+            final boolean usesKnowledgeAgent = data.getHeader().getSenderAddress().toLowerCase().startsWith("edcs://")
+                                                    || data.getHeader().getSenderAddress().toLowerCase().startsWith("edc://");
+            final HttpUrl respondToUrl = usesKnowledgeAgent ?
+                    HttpUrl.parse(data.getHeader().getRespondAssetId()).newBuilder().build()
+                    : HttpUrl.parse("http://localhost:25554/")
                     .newBuilder().addPathSegment("ruldatareceiver").addPathSegment("notifyresult").build();
 
-            final HttpHeaders headers = generateDefaultHeaders();
-            addAuthorizationHeaders(headers);
+            new Thread(() ->
+            {
+                try {
+                    Thread.sleep(2000L);
+                } catch (InterruptedException exception) {
+                }
 
-            final HttpEntity<Notification<RuLNotificationFromSupplierContentDAO>> request =
-                    new HttpEntity<>(notification, headers);
+                final HttpHeaders headers = generateDefaultHeaders();
+                addAuthorizationHeaders(headers);
 
-            final ResponseEntity<DefaultApiResult> response = restTemplate.postForEntity(
-                    requestUrl.toString(), request, DefaultApiResult.class);
+                final HttpEntity<Notification<RuLNotificationFromSupplierContentDAO>> request =
+                        new HttpEntity<>(notification, headers);
 
-            checkResponse(response);
-        }).start();
+                final ResponseEntity<DefaultApiResult> response = restTemplate.postForEntity(
+                        respondToUrl.toString(), request, DefaultApiResult.class);
+
+                checkResponse(response);
+            }).start();
+        } catch (final Exception exception) {
+            logger.error(exception.getMessage());
+            return apiHelper.failed(exception.getMessage());
+        }
+
         return apiHelper.accepted("Accepted.");
     }
 
