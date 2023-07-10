@@ -63,7 +63,7 @@ public class RuLSupplierMock {
             notification.getContent().setEndurancePredictorOutputs(outputs);
 
             final boolean usesKnowledgeAgent = data.getHeader().getSenderAddress().toLowerCase().startsWith("edcs://")
-                                                    || data.getHeader().getSenderAddress().toLowerCase().startsWith("edc://");
+                                   || data.getHeader().getSenderAddress().toLowerCase().startsWith("edc://");
             final HttpUrl respondToUrl = usesKnowledgeAgent ?
                     HttpUrl.parse(data.getHeader().getRespondAssetId()).newBuilder().build()
                     : HttpUrl.parse("http://localhost:25554/")

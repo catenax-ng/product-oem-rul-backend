@@ -24,8 +24,8 @@ Url of the provider connector (not used in the mock up).
 
     public static final String BODY_DESCRIPTION = "RuL calculation result notification.";
 
-    public static final String BODY_EXAMPLE_1_NAME = "Sample result data";
-    public static final String BODY_EXAMPLE_1_DESCRIPTION = "Sample result data, received after a simulated calculation.";
+    public static final String BODY_EXAMPLE_1_NAME = "Sample input data";
+    public static final String BODY_EXAMPLE_1_DESCRIPTION = "Sample input data, received after a simulated calculation.";
     public static final String BODY_EXAMPLE_1_VALUE = """
 {
   "header": {

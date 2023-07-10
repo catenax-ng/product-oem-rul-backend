@@ -97,32 +97,6 @@
 		</dependency>
     </dependencies>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-				<configuration>
-					<mainClass>net.catena_x.btp.rul.oem.backend.rul_service.OemRulBackendServiceApplication</mainClass>
-					<fork>false</fork>
-				</configuration>
-			</plugin>
-			<!--<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>license-maven-plugin</artifactId>
-				<version>2.0.0</version>
-				<executions>
-					<execution>
-						<id>aggregate-download-licenses</id>
-						<goals>
-							<goal>aggregate-download-licenses</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>-->
-		</plugins>
-	</build>
-
 	<profiles>
 		<profile>
 			<id>rulbackendservice</id>
