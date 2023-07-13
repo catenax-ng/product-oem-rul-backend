@@ -2,6 +2,7 @@ package net.catena_x.btp.rul.mockups.supplier;
 
 import net.catena_x.btp.libraries.bamm.common.BammLoaddataSource;
 import net.catena_x.btp.libraries.bamm.common.BammStatus;
+import net.catena_x.btp.libraries.bamm.custom.classifiedloadspectrum.ClassifiedLoadSpectrum;
 import net.catena_x.btp.libraries.bamm.custom.remainingusefullife.RemainingUsefulLife;
 import net.catena_x.btp.libraries.notification.dao.NotificationDAO;
 import net.catena_x.btp.libraries.notification.dto.Notification;
@@ -27,7 +28,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import javax.validation.constraints.NotNull;
-import java.time.Instant;
 import java.util.*;
 
 @Component
@@ -50,7 +50,7 @@ public class RuLSupplierMock {
             final List<RuLOutputDAO> outputs = new ArrayList<>(rulInputs.size());
             for (final RuLInputDAO inputData : rulInputs) {
                 outputs.add(new RuLOutputDAO(inputData.getComponentId(),
-                        "GearBox", generateRemainingUsefulLife()));
+                        getComponentType(inputData), generateRemainingUsefulLife(inputData)));
             }
 
             final Notification<RuLNotificationFromSupplierContentDAO> notification = new Notification<>();
@@ -124,9 +124,70 @@ public class RuLSupplierMock {
         return headers;
     }
 
-    private RemainingUsefulLife generateRemainingUsefulLife() {
-        return new RemainingUsefulLife(4314.0f, "4314", 123458,
-                        new BammLoaddataSource("loggedOEM", "loggedOEM", null),
-                        new BammStatus(Instant.now() , "840", 840.0f, 99331));
+    private String getComponentType(@NotNull final RuLInputDAO inputData) {
+        if(inputData.getClassifiedLoadSpectrumGearOil() != null) {
+            if(inputData.getClassifiedLoadSpectrumGearSet() != null) {
+                return "GearBox";
+            }
+            else {
+                return "GearOil";
+            }
+        } else {
+            return "GearSet";
+        }
+    }
+
+    private RemainingUsefulLife generateRemainingUsefulLife(@NotNull final RuLInputDAO inputData) {
+        BammStatus status = null;
+
+        RemainingUsefulLifeData gearSetRuLData = new RemainingUsefulLifeData(Float.MAX_VALUE, Long.MAX_VALUE);
+        RemainingUsefulLifeData gearOilRuLData = new RemainingUsefulLifeData(Float.MAX_VALUE, Long.MAX_VALUE);
+
+        if(inputData.getClassifiedLoadSpectrumGearSet() != null) {
+            status = inputData.getClassifiedLoadSpectrumGearSet().getMetadata().getStatus();
+            gearSetRuLData = calculateRuLGearSet(inputData.getClassifiedLoadSpectrumGearSet());
+        }
+
+        if(inputData.getClassifiedLoadSpectrumGearOil() != null) {
+            if(status == null) {
+                status = inputData.getClassifiedLoadSpectrumGearSet().getMetadata().getStatus();
+            }
+            gearSetRuLData = calculateRuLGearOil(inputData.getClassifiedLoadSpectrumGearOil());
+        }
+
+        return new RemainingUsefulLife(
+                Float.min(gearSetRuLData.remainingOperatingHours(), gearOilRuLData.remainingOperatingHours()),
+                null,
+                Long.min(gearSetRuLData.remainingRunningDistance(), gearOilRuLData.remainingRunningDistance()),
+                new BammLoaddataSource("loggedOEM", "loggedOEM", null),
+                status);
+    }
+
+    private RemainingUsefulLifeData calculateRuLGearSet(@NotNull final ClassifiedLoadSpectrum loadSpectrum) {
+        final RuLCalculationConfig config = new RuLCalculationConfig(
+                -0.0000018625596309f, 30040.2264135787000000f,
+                -0.0000148671745762f, 300321.0920624090000000f);
+        return calculateRuL(loadSpectrum, config);
+    }
+
+    private RemainingUsefulLifeData calculateRuLGearOil(@NotNull final ClassifiedLoadSpectrum loadSpectrum) {
+        final RuLCalculationConfig config = new RuLCalculationConfig(
+                -0.0004245150632680f, 788.4096902595900000f,
+                -0.0175255800973219f, 316695.5546034490000000f );
+        return calculateRuL(loadSpectrum, config);
+    }
+
+    private RemainingUsefulLifeData calculateRuL(@NotNull final ClassifiedLoadSpectrum loadSpectrum,
+                                                 @NotNull final RuLCalculationConfig config) {
+        final double sum = Arrays.stream(loadSpectrum.getBody().getCounts().getCountsList()).sum();
+
+        final float factorHours = loadSpectrum.getMetadata().getStatus().getOperatingHours() / 4964.1f;
+        final float factorMilage = loadSpectrum.getMetadata().getStatus().getMileage() / 147258.0f;
+
+        return new RemainingUsefulLifeData(
+                Float.min(5000f, Float.max(10f,
+                        factorHours * (float)(config.m_CountToHours() * sum + config.t_CountToHours()))),
+                Long.min(300000, Long.max(10,
+                        (long)(factorMilage * (config.m_CountToMilage() * sum + config.t_CountToMilage())))));
     }
 }
