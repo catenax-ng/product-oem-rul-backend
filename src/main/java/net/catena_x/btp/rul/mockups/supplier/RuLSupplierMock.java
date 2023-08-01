@@ -150,7 +150,7 @@ public class RuLSupplierMock {
 
         if(inputData.getClassifiedLoadSpectrumGearOil() != null) {
             if(status == null) {
-                status = inputData.getClassifiedLoadSpectrumGearSet().getMetadata().getStatus();
+                status = inputData.getClassifiedLoadSpectrumGearOil().getMetadata().getStatus();
             }
             gearSetRuLData = calculateRuLGearOil(inputData.getClassifiedLoadSpectrumGearOil());
         }
